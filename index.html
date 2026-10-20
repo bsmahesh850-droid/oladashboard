@@ -3,17 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EV DashLab — Expert Ola S1 Pro Digital Twin & RTL Engine</title>
+    <title>EV DashLab — Ola S1 Pro Smart Dashboard & RTL Verification Studio</title>
 
-    <!-- Google Fonts -->
+    <!-- Google Fonts & Leaflet OpenStreetMap CSS -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800;900&family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
-    
-    <!-- Leaflet & Leaflet Routing Machine & Geocoder CSS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
-    <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.css" />
-    <link rel="stylesheet" href="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.css" />
 
     <style>
         :root {
@@ -76,7 +72,7 @@
         .tab-content { display: none; }
         .tab-content.active { display: block; }
 
-        /* Layouts */
+        /* Layout Grids */
         .dash-grid { display: grid; grid-template-columns: 1fr 420px; gap: 24px; }
         @media (max-width: 1024px) { .dash-grid { grid-template-columns: 1fr; } }
 
@@ -87,7 +83,7 @@
             box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6);
         }
 
-        /* Cluster Styling */
+        /* Cluster Display */
         .cluster-top { display: flex; justify-content: space-between; align-items: center; }
         .turn-signals { display: flex; gap: 16px; font-size: 1.25rem; color: #2a1548; }
         .turn-signal.active { color: var(--accent-green); text-shadow: 0 0 12px var(--accent-green); }
@@ -120,7 +116,7 @@
         .tele-item .lbl { font-size: 0.65rem; color: var(--text-sub); font-weight: 700; font-family: var(--font-head); }
         .tele-item .val { font-family: var(--font-head); font-size: 0.9rem; }
 
-        /* Controls Panel */
+        /* Controls */
         .ctrl-group { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; }
         .slider-custom {
             width: 100%; height: 10px; border-radius: 5px; background: #040108; outline: none; -webkit-appearance: none; border: 1px solid var(--border-purple);
@@ -142,12 +138,9 @@
         @media (max-width: 900px) { .map-layout { grid-template-columns: 1fr; height: auto; } }
         .map-box { border-radius: 20px; overflow: hidden; border: 1px solid var(--border-purple); min-height: 450px; }
 
-        /* Hide Leaflet Routing Instructions for clean look */
-        .leaflet-routing-container { display: none !important; }
-
-        /* Infotainment Grid */
-        .info-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
-        .info-card { background: #040108; border: 1px solid var(--border-purple); border-radius: 16px; padding: 20px; display: flex; flex-direction: column; gap: 12px; }
+        /* Audio Visualizer Bar */
+        .audio-bars { display: flex; gap: 4px; align-items: flex-end; height: 24px; margin-top: 8px; }
+        .audio-bar { flex: 1; background: var(--ola-pink); height: 20%; transition: height 0.1s ease; }
 
         /* RTL Lab Layout */
         .rtl-layout { display: grid; grid-template-columns: 1fr 380px; gap: 24px; height: 650px; }
@@ -176,7 +169,7 @@
         <div class="nav-container">
             <button class="nav-btn active" onclick="switchTab('dashboard')">⚡ Live Dashboard</button>
             <button class="nav-btn" onclick="switchTab('map-planner')">🗺️ GPS Routing & Chargers</button>
-            <button class="nav-btn" onclick="switchTab('app-store')">🎵 YouTube Audio & Apps</button>
+            <button class="nav-btn" onclick="switchTab('app-store')">🎵 Audio & Companion Apps</button>
             <button class="nav-btn" onclick="switchTab('rtl-lab')">💻 RTL Hardware Studio</button>
         </div>
     </nav>
@@ -259,28 +252,33 @@
                     <h3 style="font-family:var(--font-head);">🗺️ Dynamic GPS & Chargers</h3>
                     
                     <div class="ctrl-group" style="margin:0;">
-                        <label style="font-size:0.75rem; color:var(--text-sub);">Starting Point (Current Location)</label>
-                        <input type="text" id="startInput" value="RNSIT Bengaluru" style="background:#040108; border:1px solid var(--border-purple); padding:8px; color:#fff; border-radius:8px; font-size:0.8rem;">
+                        <label style="font-size:0.75rem; color:var(--text-sub);">Starting Location</label>
+                        <input type="text" id="startInput" value="RNSIT Campus, Bengaluru" style="background:#040108; border:1px solid var(--border-purple); padding:8px; color:#fff; border-radius:8px; font-size:0.8rem;" readonly>
                     </div>
 
                     <div class="ctrl-group" style="margin:0;">
-                        <label style="font-size:0.75rem; color:var(--text-sub);">Destination Location (Type Any Place)</label>
-                        <input type="text" id="destInput" value="Mysuru Palace" style="background:#040108; border:1px solid var(--border-purple); padding:8px; color:#fff; border-radius:8px; font-size:0.8rem;">
+                        <label style="font-size:0.75rem; color:var(--text-sub);">Select Target Destination</label>
+                        <select id="destSelect" onchange="calculateRouteFromSelection(this.value)" style="background:#040108; border:1px solid var(--border-purple); padding:10px; color:#fff; border-radius:8px; font-size:0.85rem; outline:none;">
+                            <option value="davanagere">Davanagere (265 km)</option>
+                            <option value="mysuru">Mysuru Palace (145 km)</option>
+                            <option value="ecity">Electronic City Phase 1 (24 km)</option>
+                            <option value="airport">BLR International Airport (42 km)</option>
+                            <option value="tumakuru">Tumakuru Highway (68 km)</option>
+                        </select>
                     </div>
 
-                    <button class="btn btn-primary" onclick="searchAndRouteCustomLocation()">Calculate Custom Route</button>
-
-                    <div style="background:#040108; border:1px solid var(--border-purple); border-radius:12px; padding:12px; display:flex; flex-direction:column; gap:6px; font-size:0.8rem;">
-                        <div style="display:flex; justify-content:space-between;"><span>Distance:</span><strong id="routeDistText" style="color:var(--accent-cyan);">-- KM</strong></div>
-                        <div style="display:flex; justify-content:space-between;"><span>Est. Time:</span><strong id="routeTimeText" style="color:var(--accent-amber);">-- Mins</strong></div>
-                        <div style="display:flex; justify-content:space-between;"><span>Battery Required:</span><strong id="routeEnergyText">-- %</strong></div>
+                    <div style="background:#040108; border:1px solid var(--border-purple); border-radius:12px; padding:14px; display:flex; flex-direction:column; gap:8px; font-size:0.85rem;">
+                        <div style="display:flex; justify-content:space-between;"><span>Road Distance:</span><strong id="routeDistText" style="color:var(--accent-cyan);">265.0 KM</strong></div>
+                        <div style="display:flex; justify-content:space-between;"><span>Est. Driving Time:</span><strong id="routeTimeText" style="color:var(--accent-amber);">4 hrs 12 mins</strong></div>
+                        <div style="display:flex; justify-content:space-between;"><span>Battery Required:</span><strong id="routeEnergyText">196% Charge</strong></div>
+                        <div style="display:flex; justify-content:space-between;"><span>Hypercharger Stops:</span><strong id="routeStopsText" style="color:var(--ola-pink);">2 Fast Charging Stops</strong></div>
                     </div>
 
-                    <h4 style="font-family:var(--font-head); font-size:0.8rem; color:var(--ola-pink);">⚡ Click Any Station on Map to Route</h4>
-                    <div style="display:flex; flex-direction:column; gap:6px; font-size:0.75rem;" id="chargerListContainer">
-                        <div style="background:#040108; padding:8px; border-radius:6px; border:1px solid var(--border-purple); cursor:pointer;" onclick="routeToCharger(12.9352, 77.6245, 'Koramangala Hypercharger')">📍 Koramangala Hypercharger (6 Slots Free)</div>
-                        <div style="background:#040108; padding:8px; border-radius:6px; border:1px solid var(--border-purple); cursor:pointer;" onclick="routeToCharger(12.8452, 77.6602, 'Electronic City Hypercharger')">📍 Electronic City Hypercharger (4 Slots Free)</div>
-                        <div style="background:#040108; padding:8px; border-radius:6px; border:1px solid var(--border-purple); cursor:pointer;" onclick="routeToCharger(12.3000, 76.6500, 'Mysuru Highway Hypercharger')">📍 Mysuru Highway Hub (2 Slots Free)</div>
+                    <h4 style="font-family:var(--font-head); font-size:0.8rem; color:var(--ola-pink);">⚡ Click Any Charging Station to Route</h4>
+                    <div style="display:flex; flex-direction:column; gap:6px; font-size:0.75rem;">
+                        <div style="background:#040108; padding:8px; border-radius:6px; border:1px solid var(--border-purple); cursor:pointer;" onclick="routeToStation(12.9352, 77.6245, 'Koramangala Station', 18)">📍 Koramangala Station (18 km - 6 Slots Free)</div>
+                        <div style="background:#040108; padding:8px; border-radius:6px; border:1px solid var(--border-purple); cursor:pointer;" onclick="routeToStation(13.3400, 77.1000, 'Tumakuru Highway Hub', 68)">📍 Tumakuru Highway Hub (68 km - 4 Slots Free)</div>
+                        <div style="background:#040108; padding:8px; border-radius:6px; border:1px solid var(--border-purple); cursor:pointer;" onclick="routeToStation(14.1700, 76.5100, 'Chitradurga Hub', 198)">📍 Chitradurga Hub (198 km - 2 Slots Free)</div>
                     </div>
                 </div>
 
@@ -290,29 +288,32 @@
             </div>
         </section>
 
-        <!-- TAB 3: YOUTUBE MUSIC & APPS -->
+        <!-- TAB 3: AUDIO ENGINE & APPS -->
         <section id="app-store" class="tab-content">
             <div class="card-panel">
-                <h3 style="font-family:var(--font-head); margin-bottom:8px;">🎵 Ola Beats YouTube Playlist Infotainment</h3>
-                <p style="font-size:0.85rem; color:var(--text-sub); margin-bottom:20px;">Embedded YouTube Music player controller built for handlebar audio.</p>
+                <h3 style="font-family:var(--font-head); margin-bottom:8px;">🎵 Ola Beats Web Synthesizer Stream</h3>
+                <p style="font-size:0.85rem; color:var(--text-sub); margin-bottom:20px;">Native Web Audio API synthesizer stream designed for handlebar controls.</p>
 
-                <div class="info-grid">
-                    <div class="info-card">
-                        <div style="font-size:2rem;">📺</div>
-                        <h4 style="font-family:var(--font-head);">YouTube Riding Playlist</h4>
+                <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); gap:20px;">
+                    <div style="background:#040108; border:1px solid var(--border-purple); border-radius:16px; padding:20px; display:flex; flex-direction:column; gap:12px;">
+                        <div style="font-size:2rem;">🎵</div>
+                        <h4 style="font-family:var(--font-head);">Synthwave Riding Stream</h4>
+                        <p style="font-size:0.8rem; color:var(--text-sub);" id="trackTitle">Active Track: Cyberpunk Pulse (220 Hz Oscillator)</p>
                         
-                        <!-- Hidden or compact YouTube IFrame API Container -->
-                        <div style="width:100%; height:180px; background:#020005; border-radius:10px; overflow:hidden; border:1px solid var(--border-purple);">
-                            <div id="youtubePlayer" style="width:100%; height:100%;"></div>
+                        <div class="audio-bars">
+                            <div class="audio-bar" id="bar1"></div>
+                            <div class="audio-bar" id="bar2"></div>
+                            <div class="audio-bar" id="bar3"></div>
+                            <div class="audio-bar" id="bar4"></div>
+                            <div class="audio-bar" id="bar5"></div>
                         </div>
 
                         <div style="display:flex; gap:10px; margin-top:8px;">
-                            <button class="btn btn-secondary" style="flex:1;" onclick="prevYouTubeTrack()">⏮ Prev Song</button>
-                            <button class="btn btn-primary" style="flex:1;" onclick="nextYouTubeTrack()">⏭ Next Song</button>
+                            <button class="btn btn-primary" style="flex:1;" id="synthBtn" onclick="toggleSynthAudio()">▶ Play Synth Stream</button>
                         </div>
                     </div>
 
-                    <div class="info-card">
+                    <div style="background:#040108; border:1px solid var(--border-purple); border-radius:16px; padding:20px; display:flex; flex-direction:column; gap:12px;">
                         <div style="font-size:2rem;">🛞</div>
                         <h4 style="font-family:var(--font-head);">TPMS & Thermal Diagnostic</h4>
                         <p style="font-size:0.8rem; color:var(--text-sub);">Monitors tire pressure and motor temperature.</p>
@@ -386,50 +387,33 @@ endmodule</textarea>
         EV DashLab | ECE Digital System Design & RTL Verification Studio | GitHub Pages Deployment
     </footer>
 
-    <!-- Leaflet & Routing & Geocoder JS -->
+    <!-- Leaflet OpenStreetMap JS -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
-    <script src="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.js"></script>
-    <script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
-    
-    <!-- YouTube IFrame API -->
-    <script src="https://www.youtube.com/iframe_api"></script>
 
     <script>
-        // State Engine
+        // Vehicle State
         let currentSpeed = 0;
         let throttleInput = 0;
         let isBraking = false;
         let activeMode = 'HYPER';
         let rtlSpeedCaps = { ECO: 45, NORMAL: 75, SPORT: 100, HYPER: 115 };
 
-        // YouTube Player Playlist IDs
-        let ytPlayer;
-        const ytVideoIds = ['jfKfPfyJRdk', '5qap5aO4i9A', '7NOS8R0FPSM']; // Lo-fi & synthwave riding tracks
-        let currentTrackIdx = 0;
+        // Location Coordinate Database
+        const locations = {
+            rnsit: [12.9011, 77.5186],
+            davanagere: [14.4673, 75.9241],
+            mysuru: [12.3051, 76.6551],
+            ecity: [12.8452, 77.6602],
+            airport: [13.1986, 77.7066],
+            tumakuru: [13.3400, 77.1000]
+        };
 
-        function onYouTubeIframeAPIReady() {
-            ytPlayer = new YT.Player('youtubePlayer', {
-                height: '100%',
-                width: '100%',
-                videoId: ytVideoIds[currentTrackIdx],
-                playerVars: { 'autoplay': 0, 'controls': 1, 'rel': 0 },
-                events: {}
-            });
-        }
+        let routePolyline = null;
 
-        function nextYouTubeTrack() {
-            currentTrackIdx = (currentTrackIdx + 1) % ytVideoIds.length;
-            if (ytPlayer && ytPlayer.loadVideoById) {
-                ytPlayer.loadVideoById(ytVideoIds[currentTrackIdx]);
-            }
-        }
-
-        function prevYouTubeTrack() {
-            currentTrackIdx = (currentTrackIdx - 1 + ytVideoIds.length) % ytVideoIds.length;
-            if (ytPlayer && ytPlayer.loadVideoById) {
-                ytPlayer.loadVideoById(ytVideoIds[currentTrackIdx]);
-            }
-        }
+        // Web Audio Synthesizer
+        let audioCtx = null;
+        let osc = null;
+        let isSynthPlaying = false;
 
         setInterval(() => {
             document.getElementById('clockText').innerText = new Date().toLocaleTimeString();
@@ -485,6 +469,38 @@ endmodule</textarea>
             osc1.stop(ctx.currentTime + 0.3);
         }
 
+        function toggleSynthAudio() {
+            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+            if (isSynthPlaying) {
+                if (osc) osc.stop();
+                isSynthPlaying = false;
+                document.getElementById('synthBtn').innerText = "▶ Play Synth Stream";
+            } else {
+                osc = audioCtx.createOscillator();
+                let gain = audioCtx.createGain();
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(220, audioCtx.currentTime);
+                gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start();
+                isSynthPlaying = true;
+                document.getElementById('synthBtn').innerText = "⏸ Pause Synth Stream";
+                animateAudioBars();
+            }
+        }
+
+        function animateAudioBars() {
+            if (!isSynthPlaying) return;
+            for (let i = 1; i <= 5; i++) {
+                let bar = document.getElementById('bar' + i);
+                let h = Math.floor(Math.random() * 80) + 20;
+                bar.style.height = h + '%';
+            }
+            setTimeout(animateAudioBars, 150);
+        }
+
         function applyRTLCodeChanges() {
             const code = document.getElementById('rtlEditor').value;
             const ecoMatch = code.match(/LIMIT_ECO\s*=\s*(\d+)/);
@@ -502,51 +518,52 @@ endmodule</textarea>
             alert('RTL parameters compiled and applied to dashboard physics!');
         }
 
-        // Custom Geocoding Routing via Nominatim Search
-        function searchAndRouteCustomLocation() {
-            const startStr = document.getElementById('startInput').value;
-            const destStr = document.getElementById('destInput').value;
+        // Map Routing Engine
+        function calculateRouteFromSelection(key) {
+            const start = locations.rnsit;
+            const dest = locations[key];
+            if (!dest) return;
 
-            const geocoder = L.Control.Geocoder.nominatim();
+            let distKm = 265;
+            let timeStr = "4 hrs 12 mins";
 
-            geocoder.geocode(startStr, function(startResults) {
-                if (!startResults || startResults.length === 0) {
-                    alert('Could not find start location: ' + startStr);
-                    return;
-                }
-                const startLatLng = startResults[0].center;
+            if (key === 'mysuru') { distKm = 145; timeStr = "2 hrs 20 mins"; }
+            if (key === 'ecity') { distKm = 24; timeStr = "35 mins"; }
+            if (key === 'airport') { distKm = 42; timeStr = "50 mins"; }
+            if (key === 'tumakuru') { distKm = 68; timeStr = "1 hr 10 mins"; }
 
-                geocoder.geocode(destStr, function(destResults) {
-                    if (!destResults || destResults.length === 0) {
-                        alert('Could not find destination location: ' + destStr);
-                        return;
-                    }
-                    const destLatLng = destResults[0].center;
+            const batteryReq = Math.round((distKm / 135) * 100);
+            const stops = Math.floor(batteryReq / 90);
 
-                    // Update Routing Machine Waypoints
-                    window.mapRoutingControl.setWaypoints([
-                        L.latLng(startLatLng.lat, startLatLng.lng),
-                        L.latLng(destLatLng.lat, destLatLng.lng)
-                    ]);
-                });
-            });
+            document.getElementById('routeDistText').innerText = distKm + " KM";
+            document.getElementById('routeTimeText').innerText = timeStr;
+            document.getElementById('routeEnergyText').innerText = batteryReq + "% Charge";
+            document.getElementById('routeStopsText').innerText = stops > 0 ? `${stops} Fast Charging Stop(s)` : "Direct Route";
+
+            if (window.mapInstance) {
+                if (routePolyline) window.mapInstance.removeLayer(routePolyline);
+                routePolyline = L.polyline([start, dest], {color: '#ff0055', weight: 4, opacity: 0.8}).addTo(window.mapInstance);
+                window.mapInstance.fitBounds(routePolyline.getBounds(), {padding: [50, 50]});
+            }
         }
 
-        function routeToCharger(lat, lng, name) {
-            document.getElementById('destInput').value = name;
-            const startStr = document.getElementById('startInput').value;
-            const geocoder = L.Control.Geocoder.nominatim();
+        function routeToStation(lat, lng, name, distKm) {
+            const start = locations.rnsit;
+            const batteryReq = Math.round((distKm / 135) * 100);
 
-            geocoder.geocode(startStr, function(results) {
-                const startLatLng = results && results.length > 0 ? results[0].center : {lat: 12.9011, lng: 77.5186};
-                window.mapRoutingControl.setWaypoints([
-                    L.latLng(startLatLng.lat, startLatLng.lng),
-                    L.latLng(lat, lng)
-                ]);
-            });
+            document.getElementById('routeDistText').innerText = distKm + " KM";
+            document.getElementById('routeTimeText').innerText = Math.round(distKm * 1.2) + " mins";
+            document.getElementById('routeEnergyText').innerText = batteryReq + "% Charge";
+            document.getElementById('routeStopsText').innerText = "Direct to Hypercharger";
+
+            if (window.mapInstance) {
+                if (routePolyline) window.mapInstance.removeLayer(routePolyline);
+                routePolyline = L.polyline([start, [lat, lng]], {color: '#00f2fe', weight: 4, opacity: 0.9}).addTo(window.mapInstance);
+                window.mapInstance.fitBounds(routePolyline.getBounds(), {padding: [50, 50]});
+            }
         }
 
-        // Dashboard Physics Loop (60 FPS)
+        // 60 FPS Physics Engine
         setInterval(() => {
             const cap = rtlSpeedCaps[activeMode];
 
@@ -578,55 +595,31 @@ endmodule</textarea>
             }
         }, 1000 / 60);
 
-        // Map Setup with Leaflet Routing Machine & Clickable Chargers
+        // Map Initialization
         window.addEventListener('DOMContentLoaded', () => {
             if (typeof L !== 'undefined') {
-                window.mapInstance = L.map('leafletMap').setView([12.9011, 77.5186], 12);
+                window.mapInstance = L.map('leafletMap').setView(locations.rnsit, 11);
                 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                     attribution: '© OpenStreetMap contributors'
                 }).addTo(window.mapInstance);
 
-                // Add Hypercharger Markers to Map
-                const chargers = [
-                    {lat: 12.9352, lng: 77.6245, name: 'Koramangala Hypercharger (6 Slots Free)'},
-                    {lat: 12.8452, lng: 77.6602, name: 'Electronic City Hypercharger (4 Slots Free)'},
-                    {lat: 12.3000, lng: 76.6500, name: 'Mysuru Highway Hub (2 Slots Free)'}
+                // Add Origin Marker
+                L.marker(locations.rnsit).addTo(window.mapInstance).bindPopup('<b>Current Origin</b><br>RNSIT Campus, Bengaluru').openPopup();
+
+                // Add Hypercharger Station Markers
+                const stations = [
+                    {lat: 12.9352, lng: 77.6245, name: 'Koramangala Station (6 Slots Free)', dist: 18},
+                    {lat: 13.3400, lng: 77.1000, name: 'Tumakuru Highway Hub (4 Slots Free)', dist: 68},
+                    {lat: 14.1700, lng: 76.5100, name: 'Chitradurga Hub (2 Slots Free)', dist: 198}
                 ];
 
-                chargers.forEach(c => {
-                    L.marker([c.lat, c.lng]).addTo(window.mapInstance)
-                      .bindPopup(`<b>⚡ ${c.name}</b><br><button onclick="routeToCharger(${c.lat}, ${c.lng}, '${c.name}')" style="margin-top:6px;padding:4px 8px;background:#ff0055;color:#fff;border:none;border-radius:4px;cursor:pointer;">Route Here</button>`);
+                stations.forEach(s => {
+                    L.marker([s.lat, s.lng]).addTo(window.mapInstance)
+                     .bindPopup(`<b>⚡ ${s.name}</b><br><button onclick="routeToStation(${s.lat}, ${s.lng}, '${s.name}', ${s.dist})" style="margin-top:6px;padding:4px 8px;background:#ff0055;color:#fff;border:none;border-radius:4px;cursor:pointer;">Route to Station</button>`);
                 });
 
-                // Leaflet Routing Machine Initialization
-                window.mapRoutingControl = L.Routing.control({
-                    waypoints: [
-                        L.latLng(12.9011, 77.5186),
-                        L.latLng(12.2958, 76.6394)
-                    ],
-                    routeWhileDragging: false,
-                    addWaypoints: false,
-                    show: false
-                }).addTo(window.mapInstance);
-
-                // Update Distance, Time & Battery Drain Output from Real Road Geometry
-                window.mapRoutingControl.on('routesfound', function(e) {
-                    const routes = e.routes;
-                    const summary = routes[0].summary;
-                    
-                    const totalDistanceKm = (summary.totalDistance / 1000).toFixed(1);
-                    const totalTimeMins = Math.round(summary.totalTime / 60);
-                    
-                    const hours = Math.floor(totalTimeMins / 60);
-                    const mins = totalTimeMins % 60;
-                    const timeString = hours > 0 ? `${hours} hrs ${mins} mins` : `${mins} mins`;
-
-                    const batteryPercentUsed = Math.round((totalDistanceKm / 135) * 100);
-
-                    document.getElementById('routeDistText').innerText = totalDistanceKm + " KM";
-                    document.getElementById('routeTimeText').innerText = timeString;
-                    document.getElementById('routeEnergyText').innerText = batteryPercentUsed + "% Battery Drain";
-                });
+                // Draw initial route to Davanagere
+                calculateRouteFromSelection('davanagere');
             }
         });
     </script>
