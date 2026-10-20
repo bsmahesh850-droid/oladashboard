@@ -3,13 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EV DashLab — Expert Ola S1 Pro Digital Twin & RTL Engine</title>
+    <title>EV DashLab — Ola Smart Scooter & RTL Verification Studio</title>
 
-    <!-- Fonts & Leaflet OpenStreetMap CSS -->
+    <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800;900&family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    
+    <!-- Leaflet & Leaflet Routing Machine CSS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.css" />
 
     <style>
         :root {
@@ -138,11 +141,13 @@
         @media (max-width: 900px) { .map-layout { grid-template-columns: 1fr; height: auto; } }
         .map-box { border-radius: 20px; overflow: hidden; border: 1px solid var(--border-purple); min-height: 450px; }
 
+        /* Hide Leaflet Routing Default Text Panel for Clean Dashboard UI */
+        .leaflet-routing-container { display: none !important; }
+
         /* Infotainment Grid */
         .info-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
         .info-card { background: #040108; border: 1px solid var(--border-purple); border-radius: 16px; padding: 20px; display: flex; flex-direction: column; gap: 12px; }
 
-        /* Audio Visualizer Bar */
         .audio-bars { display: flex; gap: 4px; align-items: flex-end; height: 24px; margin-top: 8px; }
         .audio-bar { flex: 1; background: var(--ola-pink); height: 20%; transition: height 0.1s ease; }
 
@@ -163,7 +168,7 @@
                 <h1 style="font-family:var(--font-head); font-size:1.2rem;">EV DashLab <span style="font-size:0.8rem; color:var(--text-sub); font-weight:400;">| Ola Smart EV Studio</span></h1>
             </div>
             <div style="display:flex; align-items:center; gap:16px; font-size:0.85rem;">
-                <span id="engineBadge" style="color:var(--ola-pink); font-family:var(--font-head); font-weight:700;">Engine: RTL Parsed Sync</span>
+                <span id="engineBadge" style="color:var(--ola-pink); font-family:var(--font-head); font-weight:700;">Engine: RTL Dynamic Parser</span>
                 <span class="time-display" id="clockText">00:00:00 AM</span>
             </div>
         </div>
@@ -253,31 +258,31 @@
         <section id="map-planner" class="tab-content">
             <div class="map-layout">
                 <div class="card-panel" style="display:flex; flex-direction:column; gap:16px;">
-                    <h3 style="font-family:var(--font-head);">🗺️ GPS Navigation & Distance Engine</h3>
+                    <h3 style="font-family:var(--font-head);">🗺️ GPS Routing & Distance Engine</h3>
                     
                     <div class="ctrl-group" style="margin:0;">
-                        <label style="font-size:0.75rem; color:var(--text-sub);">Current Location (Start)</label>
-                        <input type="text" id="startLocInput" value="RNS Institute of Technology, Bengaluru" style="background:#040108; border:1px solid var(--border-purple); padding:10px; color:#fff; border-radius:8px; font-size:0.85rem;">
+                        <label style="font-size:0.75rem; color:var(--text-sub);">Select Presets or Enter Coordinates</label>
+                        <select id="routePresetSelect" onchange="selectPresetRoute(this.value)" style="background:#040108; border:1px solid var(--border-purple); padding:10px; color:#fff; border-radius:8px; font-size:0.85rem; outline:none;">
+                            <option value="blr_davanagere">RNSIT Bengaluru ➔ Davanagere (Long Trip)</option>
+                            <option value="blr_ecity">RNSIT Bengaluru ➔ Electronic City Phase 1</option>
+                            <option value="blr_airport">RNSIT Bengaluru ➔ BLR International Airport</option>
+                            <option value="blr_mysuru">RNSIT Bengaluru ➔ Mysuru Hub</option>
+                        </select>
                     </div>
 
-                    <div class="ctrl-group" style="margin:0;">
-                        <label style="font-size:0.75rem; color:var(--text-sub);">Destination Location</label>
-                        <input type="text" id="destLocInput" value="Electronic City Phase 1, Bengaluru" style="background:#040108; border:1px solid var(--border-purple); padding:10px; color:#fff; border-radius:8px; font-size:0.85rem;">
-                    </div>
-
-                    <button class="btn btn-primary" onclick="calculateRouteDetails()">Calculate Route & Battery</button>
+                    <button class="btn btn-primary" onclick="calculateLiveRouting()">Calculate Route & Battery</button>
 
                     <div style="background:#040108; border:1px solid var(--border-purple); border-radius:12px; padding:14px; display:flex; flex-direction:column; gap:8px; font-size:0.85rem;">
-                        <div style="display:flex; justify-content:space-between;"><span>Route Distance:</span><strong id="routeDistText" style="color:var(--accent-cyan);">24.5 KM</strong></div>
-                        <div style="display:flex; justify-content:space-between;"><span>Estimated Time:</span><strong id="routeTimeText" style="color:var(--accent-amber);">38 Mins (@40 km/h)</strong></div>
-                        <div style="display:flex; justify-content:space-between;"><span>Energy Required:</span><strong id="routeEnergyText">2.94 kWh (21%)</strong></div>
-                        <div style="display:flex; justify-content:space-between;"><span>Arrival Battery:</span><strong id="routeArrivalText" style="color:var(--accent-green);">67% (Safe)</strong></div>
+                        <div style="display:flex; justify-content:space-between;"><span>Actual Road Distance:</span><strong id="routeDistText" style="color:var(--accent-cyan);">264.8 KM</strong></div>
+                        <div style="display:flex; justify-content:space-between;"><span>Estimated Travel Time:</span><strong id="routeTimeText" style="color:var(--accent-amber);">4 hrs 12 mins</strong></div>
+                        <div style="display:flex; justify-content:space-between;"><span>Energy Required:</span><strong id="routeEnergyText">31.8 kWh (230% Battery)</strong></div>
+                        <div style="display:flex; justify-content:space-between;"><span>Charging Stops Needed:</span><strong id="routeStopsText" style="color:var(--ola-pink);">2 Hypercharger Stops</strong></div>
                     </div>
 
-                    <h4 style="font-family:var(--font-head); font-size:0.85rem; color:var(--ola-pink);">⚡ Route Ola Hyperchargers</h4>
+                    <h4 style="font-family:var(--font-head); font-size:0.85rem; color:var(--ola-pink);">⚡ Live Ola Hypercharger Stations</h4>
                     <div style="display:flex; flex-direction:column; gap:6px; font-size:0.75rem;">
-                        <div style="background:#040108; padding:8px 12px; border-radius:8px; border:1px solid var(--border-purple); display:flex; justify-content:space-between;"><span>RNSIT Campus Fast Hub</span><strong style="color:var(--accent-green);">4/6 Slots Free</strong></div>
-                        <div style="background:#040108; padding:8px 12px; border-radius:8px; border:1px solid var(--border-purple); display:flex; justify-content:space-between;"><span>Koramangala 5th Block Hub</span><strong style="color:var(--accent-green);">2/8 Slots Free</strong></div>
+                        <div style="background:#040108; padding:8px 12px; border-radius:8px; border:1px solid var(--border-purple); display:flex; justify-content:space-between;"><span>Tumakuru Highway Hub (54 km)</span><strong style="color:var(--accent-green);">6/8 Slots Free</strong></div>
+                        <div style="background:#040108; padding:8px 12px; border-radius:8px; border:1px solid var(--border-purple); display:flex; justify-content:space-between;"><span>Chitradurga Bypass Plaza (202 km)</span><strong style="color:var(--accent-green);">4/6 Slots Free</strong></div>
                     </div>
                 </div>
 
@@ -290,14 +295,14 @@
         <!-- TAB 3: AUDIO & COMPANION APPS -->
         <section id="app-store" class="tab-content">
             <div class="card-panel">
-                <h3 style="font-family:var(--font-head); margin-bottom:8px;">🎵 Onboard Web Synthesizer & Companion Ecosystem</h3>
-                <p style="font-size:0.85rem; color:var(--text-sub); margin-bottom:20px;">Generates real audio signals directly through your browser using Web Audio API.</p>
+                <h3 style="font-family:var(--font-head); margin-bottom:8px;">🎵 Onboard Web Synthesizer Audio Stream</h3>
+                <p style="font-size:0.85rem; color:var(--text-sub); margin-bottom:20px;">Generates real audio synthesizer sounds directly in your browser.</p>
 
                 <div class="info-grid">
                     <div class="info-card">
                         <div style="font-size:2rem;">🎵</div>
                         <h4 style="font-family:var(--font-head);">Ola Beats Synth Engine</h4>
-                        <p style="font-size:0.8rem; color:var(--text-sub);">Real Web Audio API synthesizer stream.</p>
+                        <p style="font-size:0.8rem; color:var(--text-sub);" id="synthTrackName">Track: Cyberpunk Electric Ride (Synthwave)</p>
                         
                         <div class="audio-bars">
                             <div class="audio-bar" id="bar1"></div>
@@ -308,7 +313,7 @@
                         </div>
 
                         <div style="display:flex; gap:10px; margin-top:8px;">
-                            <button class="btn btn-primary" style="flex:1;" id="audioPlayBtn" onclick="toggleSynthAudio()">▶ Play Sound</button>
+                            <button class="btn btn-primary" style="flex:1;" id="audioPlayBtn" onclick="toggleSynthAudio()">▶ Play Audio</button>
                         </div>
                     </div>
 
@@ -354,7 +359,7 @@
             pwm_out      <= 1'b0;
         end else if (brake_in) begin
             target_speed <= 8'd0; // Mechanical brake priority
-            pwm_out      <= 1 me= 1'b0;
+            pwm_out      <= 1'b0;
         end else begin
             case (mode_in)
                 2'b00: target_speed <= (throttle_in > LIMIT_ECO) ? LIMIT_ECO : throttle_in;
@@ -370,7 +375,7 @@ endmodule</textarea>
 
                 <div class="card-panel" style="display:flex; flex-direction:column; gap:16px;">
                     <h3 style="font-family:var(--font-head);">Dynamic Hardware Sync</h3>
-                    <p style="font-size:0.8rem; color:var(--text-sub);">When you change parameters like `LIMIT_HYPER = 130` in the editor, click Compile to update dashboard physics limits!</p>
+                    <p style="font-size:0.8rem; color:var(--text-sub);">Editing parameters in Verilog directly updates dashboard acceleration caps in real time.</p>
 
                     <div style="background:#040108; border:1px solid var(--border-purple); border-radius:12px; padding:14px; font-size:0.85rem;">
                         <strong style="color:var(--accent-green);">RTL ENGINE PARSED</strong>
@@ -386,8 +391,9 @@ endmodule</textarea>
         EV DashLab | ECE Digital System Design & RTL Verification Studio | GitHub Pages Deployment
     </footer>
 
-    <!-- Leaflet OpenStreetMap JS -->
+    <!-- Leaflet & Leaflet Routing Machine JS -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <script src="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.js"></script>
 
     <script>
         // State Engine
@@ -396,8 +402,16 @@ endmodule</textarea>
         let isBraking = false;
         let activeMode = 'HYPER';
         
-        // RTL Dynamic Parameters (Parsed from code editor)
         let rtlSpeedCaps = { ECO: 45, NORMAL: 75, SPORT: 100, HYPER: 115 };
+
+        // Preset Locations Matrix
+        const routePresets = {
+            "blr_davanagere": { start: [12.9011, 77.5186], end: [14.4673, 75.9241], name: "Davanagere" },
+            "blr_ecity": { start: [12.9011, 77.5186], end: [12.8452, 77.6602], name: "Electronic City" },
+            "blr_airport": { start: [12.9011, 77.5186], end: [13.1986, 77.7066], name: "BLR Airport" },
+            "blr_mysuru": { start: [12.9011, 77.5186], end: [12.2958, 76.6394], name: "Mysuru Hub" }
+        };
+        let activeRouteKey = "blr_davanagere";
 
         // Web Audio Context Synthesizer Engine
         let audioCtx = null;
@@ -445,25 +459,25 @@ endmodule</textarea>
             document.getElementById(id).classList.toggle('active');
         }
 
-        // Real Web Audio Synthesizer Stream
+        // Web Audio Synthesizer Stream
         function toggleSynthAudio() {
             if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
             if (isSynthPlaying) {
                 if (osc) osc.stop();
                 isSynthPlaying = false;
-                document.getElementById('audioPlayBtn').innerText = "▶ Play Sound";
+                document.getElementById('audioPlayBtn').innerText = "▶ Play Audio";
             } else {
                 osc = audioCtx.createOscillator();
                 let gain = audioCtx.createGain();
                 osc.type = 'sawtooth';
-                osc.frequency.setValueAtTime(220, audioCtx.currentTime); // Low electric pitch
-                gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+                osc.frequency.setValueAtTime(180, audioCtx.currentTime);
+                gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
                 osc.connect(gain);
                 gain.connect(audioCtx.destination);
                 osc.start();
                 isSynthPlaying = true;
-                document.getElementById('audioPlayBtn').innerText = "⏸ Pause Sound";
+                document.getElementById('audioPlayBtn').innerText = "⏸ Pause Audio";
                 animateAudioBars();
             }
         }
@@ -478,7 +492,7 @@ endmodule</textarea>
             osc1.connect(gain);
             gain.connect(ctx.destination);
             osc1.start();
-            osc1.stop(ctx.currentTime + 0.3); // 300ms horn sound
+            osc1.stop(ctx.currentTime + 0.3);
         }
 
         function animateAudioBars() {
@@ -491,7 +505,6 @@ endmodule</textarea>
             setTimeout(animateAudioBars, 150);
         }
 
-        // RTL Parameter Parser
         function applyRTLCodeChanges() {
             const code = document.getElementById('rtlEditor').value;
             const ecoMatch = code.match(/LIMIT_ECO\s*=\s*(\d+)/);
@@ -506,21 +519,22 @@ endmodule</textarea>
 
             document.getElementById('rtlCapText').innerText = `${rtlSpeedCaps[activeMode]} KM/H (${activeMode})`;
             document.getElementById('rtlCompileLog').innerText = `Parsed Hardware Caps: ECO=${rtlSpeedCaps.ECO} | NORMAL=${rtlSpeedCaps.NORMAL} | SPORT=${rtlSpeedCaps.SPORT} | HYPER=${rtlSpeedCaps.HYPER} KM/H.`;
-            alert('RTL code recompiled! Dashboard speed caps updated.');
+            alert('RTL parameters compiled and applied to dashboard physics!');
         }
 
-        // Calculate Route Distance & Time Physics
-        function calculateRouteDetails() {
-            const dist = 24.5; // km
-            const avgSpeed = 40; // km/h
-            const timeMins = Math.round((dist / avgSpeed) * 60);
-            const energyKwh = ((dist * 0.12)).toFixed(2); // 0.12 kWh per km
-            const batteryUsed = Math.round((dist / 115) * 100);
+        function selectPresetRoute(val) {
+            activeRouteKey = val;
+            calculateLiveRouting();
+        }
 
-            document.getElementById('routeDistText').innerText = dist + " KM";
-            document.getElementById('routeTimeText').innerText = timeMins + " Mins (@40 km/h)";
-            document.getElementById('routeEnergyText').innerText = energyKwh + ` kWh (${batteryUsed}%)`;
-            document.getElementById('routeArrivalText').innerText = (88 - batteryUsed) + "% (Safe)";
+        function calculateLiveRouting() {
+            const preset = routePresets[activeRouteKey];
+            if (!window.mapRoutingControl || !preset) return;
+
+            window.mapRoutingControl.setWaypoints([
+                L.latLng(preset.start[0], preset.start[1]),
+                L.latLng(preset.end[0], preset.end[1])
+            ]);
         }
 
         // Dashboard Physics Loop (60 FPS)
@@ -528,7 +542,7 @@ endmodule</textarea>
             const cap = rtlSpeedCaps[activeMode];
 
             if (isBraking) {
-                currentSpeed = Math.max(0, currentSpeed - 4.5); // Safety brake override
+                currentSpeed = Math.max(0, currentSpeed - 4.5);
             } else {
                 const target = (throttleInput / 100) * cap;
                 if (currentSpeed < target) currentSpeed = Math.min(target, currentSpeed + 0.8);
@@ -555,18 +569,48 @@ endmodule</textarea>
             }
         }, 1000 / 60);
 
-        // Map Setup
+        // Map Setup with Leaflet Routing Machine
         window.addEventListener('DOMContentLoaded', () => {
             if (typeof L !== 'undefined') {
-                window.mapInstance = L.map('leafletMap').setView([12.9011, 77.5186], 13);
+                window.mapInstance = L.map('leafletMap').setView([12.9011, 77.5186], 8);
                 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                     attribution: '© OpenStreetMap contributors'
                 }).addTo(window.mapInstance);
 
-                // Origin & Destination Markers
-                L.marker([12.9011, 77.5186]).addTo(window.mapInstance).bindPopup('<b>Current Location</b><br>RNSIT Campus').openPopup();
-                L.marker([12.8452, 77.6602]).addTo(window.mapInstance).bindPopup('<b>Destination</b><br>Electronic City Phase 1');
-                L.circleMarker([12.8800, 77.5800], {color: 'purple', radius: 8}).addTo(window.mapInstance).bindPopup('Ola Hypercharger Station');
+                // Leaflet Routing Machine Initialization
+                const preset = routePresets["blr_davanagere"];
+                window.mapRoutingControl = L.Routing.control({
+                    waypoints: [
+                        L.latLng(preset.start[0], preset.start[1]),
+                        L.latLng(preset.end[0], preset.end[1])
+                    ],
+                    routeWhileDragging: false,
+                    addWaypoints: false,
+                    show: false
+                }).addTo(window.mapInstance);
+
+                // Update Distance, Time & Battery Drain Output from Real Road Geometry
+                window.mapRoutingControl.on('routesfound', function(e) {
+                    const routes = e.routes;
+                    const summary = routes[0].summary;
+                    
+                    const totalDistanceKm = (summary.totalDistance / 1000).toFixed(1); // Real road km
+                    const totalTimeMins = Math.round(summary.totalTime / 60); // Real driving time in mins
+                    
+                    const hours = Math.floor(totalTimeMins / 60);
+                    const mins = totalTimeMins % 60;
+                    const timeString = hours > 0 ? `${hours} hrs ${mins} mins` : `${mins} mins`;
+
+                    // Scooter Battery Physics Math (Ola S1 Pro 4 kWh Battery = 135 km max range)
+                    const energyKwh = (totalDistanceKm * 0.03).toFixed(1); // kWh used
+                    const batteryPercentUsed = Math.round((totalDistanceKm / 135) * 100);
+                    const chargingStopsNeeded = Math.floor(batteryPercentUsed / 90);
+
+                    document.getElementById('routeDistText').innerText = totalDistanceKm + " KM";
+                    document.getElementById('routeTimeText').innerText = timeString;
+                    document.getElementById('routeEnergyText').innerText = energyKwh + ` kWh (${batteryPercentUsed}% Charge)`;
+                    document.getElementById('routeStopsText').innerText = chargingStopsNeeded > 0 ? `${chargingStopsNeeded} Hypercharger Stop(s)` : "Direct Route (No Stops)";
+                });
             }
         });
     </script>
