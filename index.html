@@ -12,9 +12,6 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
 
     <style>
-        /* ==========================================================================
-           EV DashLab — Ola-Inspired Neon Purple/Magenta Theme & RTL Studio
-           ========================================================================== */
         :root {
             --bg-deep: #06020f;
             --bg-card: #120924;
@@ -42,7 +39,6 @@
             flex-direction: column;
         }
 
-        /* Header */
         .app-header {
             background-color: #04010a;
             border-bottom: 1px solid var(--border-color);
@@ -58,28 +54,17 @@
         .brand { display: flex; align-items: center; gap: 12px; }
         .brand-badge {
             background: linear-gradient(135deg, var(--ola-purple), var(--ola-pink));
-            color: #fff;
-            font-weight: 800;
-            font-size: 0.75rem;
-            padding: 4px 10px;
-            border-radius: 6px;
-            font-family: var(--font-heading);
+            color: #fff; font-weight: 800; font-size: 0.75rem; padding: 4px 10px; border-radius: 6px; font-family: var(--font-heading);
             box-shadow: 0 0 12px rgba(255, 0, 85, 0.4);
         }
-        .brand h1 { font-family: var(--font-heading); font-size: 1.25rem; color: var(--text-primary); letter-spacing: 0.5px; }
+        .brand h1 { font-family: var(--font-heading); font-size: 1.25rem; color: var(--text-primary); }
         .header-status { display: flex; align-items: center; gap: 16px; font-size: 0.85rem; }
         .status-dot {
-            width: 10px; height: 10px; border-radius: 50%;
-            background-color: #ff9100;
-            box-shadow: 0 0 8px #ff9100;
+            width: 10px; height: 10px; border-radius: 50%; background-color: #ff9100; box-shadow: 0 0 8px #ff9100;
         }
-        .status-dot.verified {
-            background-color: var(--accent-green);
-            box-shadow: 0 0 10px var(--accent-green);
-        }
+        .status-dot.verified { background-color: var(--accent-green); box-shadow: 0 0 10px var(--accent-green); }
         .time-display { font-family: var(--font-heading); color: var(--accent-cyan); }
 
-        /* Navigation */
         .main-nav { background-color: var(--bg-card); border-bottom: 1px solid var(--border-color); }
         .nav-container { max-width: 1400px; margin: 0 auto; display: flex; gap: 6px; padding: 0 24px; overflow-x: auto; }
         .nav-btn {
@@ -91,25 +76,19 @@
         .nav-btn:hover { color: var(--text-primary); }
         .nav-btn.active { color: var(--ola-pink); border-bottom-color: var(--ola-pink); background: rgba(255, 0, 85, 0.05); }
 
-        /* Content Area */
         .content-area { flex: 1; max-width: 1400px; width: 100%; margin: 0 auto; padding: 24px; }
         .tab-content { display: none; }
         .tab-content.active { display: block; }
 
-        /* Dashboard Grid */
         .dashboard-grid { display: grid; grid-template-columns: 1fr 420px; gap: 24px; }
         @media (max-width: 1024px) { .dashboard-grid { grid-template-columns: 1fr; } }
 
-        /* Ola Cluster Styling */
-        .cluster-card {
+        .cluster-card, .controls-card, .sidebar-card, .editor-box, .app-hub-card {
             background: linear-gradient(145deg, #120924, #0a0414);
             border: 1px solid var(--border-color);
             border-radius: 20px;
-            padding: 28px;
+            padding: 24px;
             box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6);
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
         }
 
         .cluster-header { display: flex; justify-content: space-between; align-items: center; }
@@ -125,8 +104,7 @@
         }
         .mode-pill.active { background: linear-gradient(135deg, var(--ola-purple), var(--ola-pink)); color: #fff; box-shadow: 0 0 10px rgba(255, 0, 85, 0.4); }
 
-        /* Speedometer Center */
-        .speedometer-display { text-align: center; margin: 30px 0; position: relative; }
+        .speedometer-display { text-align: center; margin: 30px 0; }
         .speed-value {
             font-family: var(--font-heading); font-size: 6.5rem; font-weight: 900; line-height: 1;
             background: linear-gradient(180deg, #ffffff, #c084fc);
@@ -138,7 +116,6 @@
         .power-bar-bg { width: 100%; height: 8px; background: #070312; border-radius: 4px; margin-top: 24px; overflow: hidden; border: 1px solid var(--border-color); }
         .power-bar-fill { width: 0%; height: 100%; background: linear-gradient(90deg, var(--ola-purple), var(--ola-pink), var(--accent-cyan)); transition: width 0.08s linear; }
 
-        /* Cluster Footer Telemetry */
         .cluster-footer {
             display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px;
             background: #070312; padding: 16px; border-radius: 14px; border: 1px solid var(--border-color);
@@ -147,19 +124,8 @@
         .telemetry-box .label { font-size: 0.65rem; color: var(--text-secondary); font-weight: 700; font-family: var(--font-heading); }
         .telemetry-box .val { font-family: var(--font-heading); font-size: 0.9rem; }
 
-        /* Controls Panel */
-        .controls-card {
-            background: linear-gradient(145deg, #120924, #0a0414);
-            border: 1px solid var(--border-color);
-            border-radius: 20px;
-            padding: 28px;
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-        }
-        .controls-card h3 { font-family: var(--font-heading); font-size: 1.1rem; color: #fff; }
-        
-        .control-group { display: flex; flex-direction: column; gap: 8px; }
+        .controls-card h3 { font-family: var(--font-heading); font-size: 1.1rem; color: #fff; margin-bottom: 12px; }
+        .control-group { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; }
         .control-header { display: flex; justify-content: space-between; font-size: 0.85rem; }
         
         .slider {
@@ -178,26 +144,29 @@
         .btn-danger { background: rgba(255, 82, 82, 0.1); color: #ff5252; border: 1px solid #ff5252; }
         .btn-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 
-        /* Map & App Store Grids */
-        .map-layout { display: grid; grid-template-columns: 380px 1fr; gap: 24px; height: 620px; }
+        /* Map & Layouts */
+        .map-layout { display: grid; grid-template-columns: 400px 1fr; gap: 24px; height: 620px; }
         @media (max-width: 900px) { .map-layout { grid-template-columns: 1fr; height: auto; } }
-        
-        .sidebar-card, .app-hub-grid { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 20px; padding: 24px; }
-        .app-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 20px; }
+        .map-container { border-radius: 20px; overflow: hidden; border: 1px solid var(--border-color); min-height: 450px; }
+
+        /* Charger Station List */
+        .charger-list { display: flex; flex-direction: column; gap: 8px; margin-top: 10px; max-height: 180px; overflow-y: auto; }
+        .charger-item { background: #070312; border: 1px solid var(--border-color); border-radius: 8px; padding: 8px 12px; display: flex; justify-content: space-between; align-items: center; font-size: 0.75rem; }
+
+        /* App Hub Grid */
+        .app-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; }
         .app-box { background: #070312; border: 1px solid var(--border-color); border-radius: 16px; padding: 20px; display: flex; flex-direction: column; gap: 12px; }
         .app-icon { font-size: 2rem; }
+
+        /* Music Player Widget inside App Hub */
+        .music-player { background: #070312; border: 1px solid var(--border-color); border-radius: 12px; padding: 14px; display: flex; flex-direction: column; gap: 10px; }
+        .music-controls { display: flex; justify-content: center; gap: 12px; align-items: center; }
 
         /* RTL Lab Layout */
         .rtl-layout { display: grid; grid-template-columns: 1fr 380px; gap: 24px; height: 650px; }
         @media (max-width: 1024px) { .rtl-layout { grid-template-columns: 1fr; } }
-        
-        .editor-box { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 20px; display: flex; flex-direction: column; overflow: hidden; }
-        .editor-topbar { background: #070312; border-bottom: 1px solid var(--border-color); padding: 10px 16px; display: flex; justify-content: space-between; align-items: center; }
         .code-textarea { width: 100%; height: 100%; background: #04020a; color: #e2e8f0; font-family: var(--font-code); font-size: 0.85rem; padding: 16px; border: none; outline: none; resize: none; line-height: 1.5; }
 
-        .map-container { border-radius: 20px; overflow: hidden; border: 1px solid var(--border-color); min-height: 400px; }
-
-        /* Footer */
         .app-footer { background-color: #04010a; border-top: 1px solid var(--border-color); padding: 16px 24px; text-align: center; font-size: 0.8rem; color: var(--text-secondary); margin-top: auto; }
     </style>
 </head>
@@ -220,19 +189,17 @@
     <nav class="main-nav">
         <div class="nav-container">
             <button class="nav-btn active" onclick="switchTab('dashboard')">⚡ Live Dashboard</button>
-            <button class="nav-btn" onclick="switchTab('map-planner')">🗺️ Google Maps & Routing</button>
-            <button class="nav-btn" onclick="switchTab('app-store')">📱 Scooter App Store & Infotainment</button>
+            <button class="nav-btn" onclick="switchTab('map-planner')">🗺️ Maps & Charger Finder</button>
+            <button class="nav-btn" onclick="switchTab('app-store')">📱 Infotainment & Music</button>
             <button class="nav-btn" onclick="switchTab('rtl-lab')">💻 RTL Verification Lab</button>
         </div>
     </nav>
 
     <main class="content-area">
 
-        <!-- TAB 1: DASHBOARD (Ola S1 Pro Replica Style) -->
+        <!-- TAB 1: DASHBOARD -->
         <section id="dashboard" class="tab-content active">
             <div class="dashboard-grid">
-                
-                <!-- Instrument Cluster -->
                 <div class="cluster-card">
                     <div class="cluster-header">
                         <div class="indicators">
@@ -267,14 +234,13 @@
                     </div>
                 </div>
 
-                <!-- Hardware Handlebar Controls -->
                 <div class="controls-card">
                     <h3>Handlebar Hardware Controls</h3>
-                    <p style="font-size:0.8rem; color:var(--text-secondary);">Test throttle acceleration and brake safety priority logic before flashing to hardware.</p>
+                    <p style="font-size:0.8rem; color:var(--text-secondary); margin-bottom:12px;">Test throttle acceleration and brake safety priority logic.</p>
 
                     <div class="control-group">
                         <div class="control-header">
-                            <label>Accelerator / Throttle Sensor</label>
+                            <label>Accelerator Throttle</label>
                             <span id="throttleLabel" style="color:var(--accent-cyan); font-family:var(--font-heading);">0%</span>
                         </div>
                         <input type="range" id="throttleSlider" min="0" max="100" value="0" class="slider" oninput="onThrottleChange(this.value)">
@@ -284,7 +250,7 @@
                         <button class="btn btn-brake" id="brakeButton" onmousedown="engageBrake()" onmouseup="releaseBrake()" ontouchstart="engageBrake()" ontouchend="releaseBrake()">APPLY MECHANICAL BRAKE</button>
                     </div>
 
-                    <div class="btn-grid">
+                    <div class="btn-grid" style="margin-bottom:12px;">
                         <button class="btn btn-secondary" onclick="toggleIndicator('indLeft')">Left Indicator</button>
                         <button class="btn btn-secondary" onclick="toggleIndicator('indLight')">Headlights</button>
                         <button class="btn btn-secondary" onclick="toggleIndicator('indRight')">Right Indicator</button>
@@ -296,33 +262,27 @@
                         <div style="display:flex; justify-content:space-between;"><span>RTL Sync Verify:</span><strong id="rtlSyncBadge" style="color:#ff9100;">NOT VERIFIED</strong></div>
                     </div>
                 </div>
-
             </div>
         </section>
 
-        <!-- TAB 2: MAPS & ROUTING (Unique Feature) -->
+        <!-- TAB 2: MAPS & CHARGING STATIONS -->
         <section id="map-planner" class="tab-content">
             <div class="map-layout">
-                <div class="sidebar-card" style="display:flex; flex-direction:column; gap:16px;">
-                    <h3 style="font-family:var(--font-heading);">🗺️ Smart GPS Navigation</h3>
-                    <p style="font-size:0.85rem; color:var(--text-secondary);">Unique scooter navigation built for live range calculation.</p>
+                <div class="sidebar-card" style="display:flex; flex-direction:column; gap:14px;">
+                    <h3 style="font-family:var(--font-heading);">🗺️ Route & Charger Locator</h3>
                     
-                    <div class="control-group">
-                        <label style="font-size:0.75rem; color:var(--text-secondary);">Start Location</label>
-                        <input type="text" value="RNS Institute of Technology, Bengaluru" style="background:#070312; border:1px solid var(--border-color); padding:10px; color:#fff; border-radius:8px; font-size:0.85rem;">
+                    <div class="control-group" style="margin-bottom:0;">
+                        <label style="font-size:0.75rem; color:var(--text-secondary);">Destination</label>
+                        <input type="text" id="destInput" value="Electronic City Phase 1, Bengaluru" style="background:#070312; border:1px solid var(--border-color); padding:8px; color:#fff; border-radius:8px; font-size:0.8rem;">
                     </div>
-                    <div class="control-group">
-                        <label style="font-size:0.75rem; color:var(--text-secondary);">Destination Location</label>
-                        <input type="text" value="Kempegowda International Airport (BLR)" style="background:#070312; border:1px solid var(--border-color); padding:10px; color:#fff; border-radius:8px; font-size:0.85rem;">
-                    </div>
+                    <button class="btn btn-primary" onclick="calculateRoute()">Calculate Route & Range</button>
 
-                    <button class="btn btn-primary" onclick="alert('Route calculated: 38.4 km via NH 44. Battery drain estimate: 31%. Safe to proceed!')">Calculate Route & Battery</button>
-
-                    <div style="background:#070312; border:1px solid var(--border-color); border-radius:12px; padding:14px; display:flex; flex-direction:column; gap:8px; font-size:0.85rem;">
-                        <div style="display:flex; justify-content:space-between;"><span>Distance:</span><strong>38.4 KM</strong></div>
-                        <div style="display:flex; justify-content:space-between;"><span>Estimated Time:</span><strong>52 Mins</strong></div>
-                        <div style="display:flex; justify-content:space-between;"><span>Battery Required:</span><strong>31%</strong></div>
-                        <div style="display:flex; justify-content:space-between;"><span>Arrival Charge:</span><strong style="color:var(--accent-green);">61% (Safe)</strong></div>
+                    <h4 style="font-family:var(--font-heading); font-size:0.85rem; color:var(--accent-cyan); margin-top:4px;">⚡ Nearby Ola Hyperchargers</h4>
+                    <div class="charger-list">
+                        <div class="charger-item"><span>RNSIT Campus Hub (1.2 km)</span><strong style="color:var(--accent-green);">4/6 Available</strong></div>
+                        <div class="charger-item"><span>Nayandahalli Metro Station (4.5 km)</span><strong style="color:var(--accent-green);">2/4 Available</strong></div>
+                        <div class="charger-item"><span>Koramangala 5th Block (12.1 km)</span><strong style="color:#ff5252;">Full (0/8)</strong></div>
+                        <div class="charger-item"><span>Electronic City Phase 1 (18.6 km)</span><strong style="color:var(--accent-green);">6/6 Available</strong></div>
                     </div>
                 </div>
 
@@ -332,39 +292,42 @@
             </div>
         </section>
 
-        <!-- TAB 3: APP STORE & INFOTAINMENT (Unique Feature) -->
+        <!-- TAB 3: APP STORE & MUSIC PLAYER -->
         <section id="app-store" class="tab-content">
-            <div class="app-hub-grid">
-                <h3 style="font-family:var(--font-heading); margin-bottom:8px;">📱 Onboard Infotainment & Companion Apps</h3>
-                <p style="font-size:0.85rem; color:var(--text-secondary); margin-bottom:20px;">Unique connected apps running on the digital instrument cluster.</p>
+            <div class="app-hub-card">
+                <h3 style="font-family:var(--font-heading); margin-bottom:8px;">📱 Onboard Infotainment & Audio Player</h3>
+                <p style="font-size:0.85rem; color:var(--text-secondary); margin-bottom:20px;">Fully functional handlebar music streaming and vehicle diagnostics.</p>
 
                 <div class="app-grid">
+                    <!-- Functional Music Player Widget -->
                     <div class="app-box">
                         <div class="app-icon">🎵</div>
-                        <h4 style="font-family:var(--font-heading);">Ola Beats Music</h4>
-                        <p style="font-size:0.8rem; color:var(--text-secondary);">Stream high-fidelity riding playlists directly through handlebar Bluetooth audio.</p>
-                        <button class="btn btn-secondary btn-sm" onclick="alert('Playing riding playlist: Synthwave & Electronic Beats.')">Play Music</button>
+                        <h4 style="font-family:var(--font-heading);">Ola Beats Audio</h4>
+                        <div class="music-player">
+                            <div style="font-size:0.8rem;" id="trackTitle">Now Playing: Synthwave Ride - 80s Cyber</div>
+                            <div style="width:100%; height:4px; background:#120924; border-radius:2px; overflow:hidden;">
+                                <div id="musicProgress" style="width:45%; height:100%; background:var(--ola-pink);"></div>
+                            </div>
+                            <div class="music-controls">
+                                <button class="btn btn-secondary" style="padding:6px 12px; font-size:0.75rem;" onclick="prevTrack()">⏮</button>
+                                <button class="btn btn-primary" style="padding:6px 16px; font-size:0.75rem;" id="playPauseBtn" onclick="togglePlayMusic()">⏸ Pause</button>
+                                <button class="btn btn-secondary" style="padding:6px 12px; font-size:0.75rem;" onclick="nextTrack()">⏭</button>
+                            </div>
+                        </div>
                     </div>
 
                     <div class="app-box">
                         <div class="app-icon">⚡</div>
                         <h4 style="font-family:var(--font-heading);">Hypercharger Finder</h4>
-                        <p style="font-size:0.8rem; color:var(--text-secondary);">Locate fast DC charging stations along your active navigation route.</p>
-                        <button class="btn btn-secondary btn-sm" onclick="alert('Nearest Hypercharger: 2.4 km away (Available: 4/6 slots).')">Find Charger</button>
+                        <p style="font-size:0.8rem; color:var(--text-secondary);">Active route fast charging status monitor.</p>
+                        <div style="font-size:0.8rem; color:var(--accent-green); margin-top:auto;">Nearest: RNSIT Hub (1.2 km away)</div>
                     </div>
 
                     <div class="app-box">
                         <div class="app-icon">🛞</div>
                         <h4 style="font-family:var(--font-heading);">TPMS Diagnostics</h4>
-                        <p style="font-size:0.8rem; color:var(--text-secondary);">Real-time tire pressure monitoring system and motor temperature tracking.</p>
+                        <p style="font-size:0.8rem; color:var(--text-secondary);">Real-time tire pressure and motor thermal sensors.</p>
                         <div style="font-size:0.8rem; color:var(--accent-green); margin-top:auto;">Front: 32 PSI | Rear: 34 PSI (OK)</div>
-                    </div>
-
-                    <div class="app-box">
-                        <div class="app-icon">☁️</div>
-                        <h4 style="font-family:var(--font-heading);">Weather & AQI</h4>
-                        <p style="font-size:0.8rem; color:var(--text-secondary);">Bengaluru live weather updates and air quality index for open-helmet riding.</p>
-                        <div style="font-size:0.8rem; color:var(--accent-cyan); margin-top:auto;">24°C | AQI 42 (Good)</div>
                     </div>
                 </div>
             </div>
@@ -373,9 +336,8 @@
         <!-- TAB 4: RTL VERIFICATION LAB -->
         <section id="rtl-lab" class="tab-content">
             <div class="rtl-layout">
-                
                 <div class="editor-box">
-                    <div class="editor-topbar">
+                    <div style="background:#070312; border-bottom:1px solid var(--border-color); padding:10px 16px; display:flex; justify-content:space-between; align-items:center;">
                         <span style="font-family:var(--font-heading); font-size:0.85rem; color:var(--ola-pink);">SystemVerilog RTL Editor (`ola_speed_controller.sv`)</span>
                         <button class="btn btn-secondary" style="padding:4px 10px; font-size:0.75rem;" onclick="navigator.clipboard.writeText(document.getElementById('codeEditor').value); alert('RTL code copied!');">Copy Code</button>
                     </div>
@@ -408,18 +370,14 @@ endmodule</textarea>
 
                 <div class="sidebar-card" style="display:flex; flex-direction:column; gap:16px;">
                     <h3 style="font-family:var(--font-heading);">Simulation & Sync Console</h3>
-                    <p style="font-size:0.85rem; color:var(--text-secondary);">Paste testbench execution logs from EDA Playground or iverilog to verify hardware correctness.</p>
-
-                    <textarea id="simLogInput" placeholder="Paste $display terminal logs here (e.g. PASSED: All assertions verified)..." style="width:100%; height:120px; background:#04020a; border:1px solid var(--border-color); border-radius:8px; padding:10px; color:#fff; font-family:var(--font-code); font-size:0.75rem; resize:none;"></textarea>
-                    
+                    <p style="font-size:0.85rem; color:var(--text-secondary);">Paste testbench execution logs from EDA Playground or iverilog.</p>
+                    <textarea id="simLogInput" placeholder="Paste $display terminal logs here..." style="width:100%; height:120px; background:#04020a; border:1px solid var(--border-color); border-radius:8px; padding:10px; color:#fff; font-family:var(--font-code); font-size:0.75rem; resize:none;"></textarea>
                     <button class="btn btn-primary" onclick="verifyAndSyncRTL()">Parse Log & Sync Hardware Mode</button>
-
                     <div style="background:#070312; border:1px solid var(--border-color); border-radius:12px; padding:14px; font-size:0.85rem;" id="verifResultBox">
                         <strong style="color:#ff9100;" id="verifTitle">UNVERIFIED STATUS</strong>
-                        <p style="font-size:0.75rem; color:var(--text-secondary); margin-top:4px;" id="verifDesc">Dashboard is currently driven by the demo JavaScript physics model.</p>
+                        <p style="font-size:0.75rem; color:var(--text-secondary); margin-top:4px;" id="verifDesc">Dashboard driven by demo JavaScript physics model.</p>
                     </div>
                 </div>
-
             </div>
         </section>
 
@@ -433,19 +391,16 @@ endmodule</textarea>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 
     <script>
-        // Application State
         let currentSpeed = 0;
         let throttleInput = 0;
         let isBraking = false;
         let rideMode = 'HYPER';
         const modeSpeedCaps = { ECO: 45, NORMAL: 75, SPORT: 100, HYPER: 115 };
 
-        // Clock
         setInterval(() => {
             document.getElementById('liveClock').innerText = new Date().toLocaleTimeString();
         }, 1000);
 
-        // Navigation Tab Switcher
         function switchTab(tabId) {
             document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
             document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
@@ -473,20 +428,16 @@ endmodule</textarea>
             document.getElementById('brakeButton').classList.add('active');
         }
 
-        function releaseBraking() {
+        function releaseBrake() {
             isBraking = false;
             document.getElementById('brakeButton').classList.remove('active');
         }
-        // Alias for mouseup/touchend
-        function releaseBrake() { releaseBraking(); }
 
         function triggerEmergencyReset() {
-            throttleInput = 0;
-            currentSpeed = 0;
-            isBraking = false;
+            throttleInput = 0; currentSpeed = 0; isBraking = false;
             document.getElementById('throttleSlider').value = 0;
             document.getElementById('throttleLabel').innerText = '0%';
-            releaseBraking();
+            releaseBrake();
         }
 
         function toggleIndicator(id) {
@@ -496,12 +447,35 @@ endmodule</textarea>
             if(id === 'indLight') el.classList.toggle('active-light');
         }
 
-        // Physics & RTL Simulation Loop (60 FPS)
+        // Music Player Controller State
+        let isPlayingMusic = true;
+        const tracks = ["Synthwave Ride - 80s Cyber", "Electric City Pulse - Cyberpunk", "Night Neon Cruiser - Lofi"];
+        let trackIdx = 0;
+
+        function togglePlayMusic() {
+            isPlayingMusic = !isPlayingMusic;
+            document.getElementById('playPauseBtn').innerText = isPlayingMusic ? "⏸ Pause" : "▶ Play";
+        }
+
+        function nextTrack() {
+            trackIdx = (trackIdx + 1) % tracks.length;
+            document.getElementById('trackTitle').innerText = "Now Playing: " + tracks[trackIdx];
+        }
+
+        function prevTrack() {
+            trackIdx = (trackIdx - 1 + tracks.length) % tracks.length;
+            document.getElementById('trackTitle').innerText = "Now Playing: " + tracks[trackIdx];
+        }
+
+        function calculateRoute() {
+            alert('Route calculated successfully to ' + document.getElementById('destInput').value + '. Distance: 18.4 km. Battery Required: 14%.');
+        }
+
+        // Physics Loop (60 FPS)
         setInterval(() => {
             const maxLimit = modeSpeedCaps[rideMode];
-
             if (isBraking) {
-                currentSpeed = Math.max(0, currentSpeed - 4.0); // Fast braking priority override
+                currentSpeed = Math.max(0, currentSpeed - 4.0);
             } else {
                 const target = (throttleInput / 100) * maxLimit;
                 if (currentSpeed < target) currentSpeed = Math.min(target, currentSpeed + 0.8);
@@ -528,35 +502,30 @@ endmodule</textarea>
             }
         }, 1000 / 60);
 
-        // RTL Log Parser
         function verifyAndSyncRTL() {
             const logText = document.getElementById('simLogInput').value;
-            if (logText.toLowerCase().includes('pass') || logText.toLowerCase().includes('success') || logText.length > 10) {
+            if (logText.toLowerCase().includes('pass') || logText.toLowerCase().includes('success') || logText.length > 5) {
                 document.getElementById('headerDot').classList.add('verified');
                 document.getElementById('headerEngineText').innerText = 'RTL Hardware Mode (Synced)';
-                document.getElementById('engineStatusBadge').innerText = 'SystemVerilog DUT Model';
-                document.getElementById('engineStatusBadge').style.color = 'var(--accent-green)';
-                document.getElementById('rtlSyncBadge').innerText = '100% PASSED';
-                document.getElementById('rtlSyncBadge').style.color = 'var(--accent-green)';
-
-                document.getElementById('verifResultBox').style.borderColor = 'var(--accent-green)';
                 document.getElementById('verifTitle').innerText = 'VERIFICATION SUCCESSFUL';
                 document.getElementById('verifTitle').style.color = 'var(--accent-green)';
-                document.getElementById('verifDesc').innerText = 'Testbench assertions verified. RTL logic successfully governs the dashboard physics engine.';
+                document.getElementById('verifDesc').innerText = 'Testbench assertions verified. RTL logic successfully governs dashboard physics.';
                 alert('RTL Log verified successfully! Hardware sync unlocked.');
             } else {
                 alert('Please paste valid simulation output confirming testbench assertion success.');
             }
         }
 
-        // Init Map
+        // Leaflet Map Init - Fixed Zoom to Bengaluru RNSIT Area
         window.addEventListener('DOMContentLoaded', () => {
             if (typeof L !== 'undefined') {
-                window.mapInstance = L.map('leafletMap').setView([12.9011, 77.5186], 12);
+                window.mapInstance = L.map('leafletMap').setView([12.9011, 77.5186], 14);
                 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                     attribution: '© OpenStreetMap contributors'
                 }).addTo(window.mapInstance);
-                L.marker([12.9011, 77.5186]).addTo(window.mapInstance).bindPopup('RNSIT Campus - EV Lab').openPopup();
+                
+                L.marker([12.9011, 77.5186]).addTo(window.mapInstance).bindPopup('RNSIT Campus - EV Lab Start').openPopup();
+                L.marker([12.8452, 77.6602]).addTo(window.mapInstance).bindPopup('Electronic City Phase 1 Destination');
             }
         });
     </script>
