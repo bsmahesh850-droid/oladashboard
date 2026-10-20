@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EV DashLab — Expert Ola S1 Pro Digital Twin & RTL Engine</title>
+    <title>EV DashLab — Ola S1 Pro Smart Dashboard & RTL Verification Studio</title>
 
     <!-- Google Fonts & Leaflet OpenStreetMap CSS -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -136,7 +136,7 @@
         /* Maps & Routing Layout */
         .map-layout { display: grid; grid-template-columns: 420px 1fr; gap: 24px; height: 640px; }
         @media (max-width: 900px) { .map-layout { grid-template-columns: 1fr; height: auto; } }
-        .map-box { border-radius: 20px; overflow: hidden; border: 1px solid var(--border-purple); min-height: 450px; background: #040108; }
+        .map-box { border-radius: 20px; overflow: hidden; border: 1px solid var(--border-purple); min-height: 450px; background: #040108; position: relative; }
 
         /* RTL Lab Layout */
         .rtl-layout { display: grid; grid-template-columns: 1fr 380px; gap: 24px; height: 650px; }
@@ -245,27 +245,27 @@
         <section id="map-planner" class="tab-content">
             <div class="map-layout">
                 <div class="card-panel" style="display:flex; flex-direction:column; gap:12px;">
-                    <h3 style="font-family:var(--font-head);">🗺️ Smart GPS Navigation</h3>
+                    <h3 style="font-family:var(--font-head);">🗺️ Smart On-Page GPS Navigation</h3>
                     
                     <div class="ctrl-group" style="margin:0;">
-                        <label style="font-size:0.75rem; color:var(--text-sub);">Search Any Destination</label>
+                        <label style="font-size:0.75rem; color:var(--text-sub);">Search Destination (Type Any City or Place)</label>
                         <div style="display:flex; gap:6px;">
-                            <input type="text" id="customDestInput" placeholder="Enter city, locality or spot..." value="Mysuru Palace" style="flex:1; background:#040108; border:1px solid var(--border-purple); padding:8px; color:#fff; border-radius:8px; font-size:0.8rem; outline:none;">
-                            <button class="btn btn-primary" style="padding:8px 14px;" onclick="searchAndRouteOnMap()">Search</button>
+                            <input type="text" id="customDestInput" placeholder="Enter Davanagere, Mysuru, Delhi..." value="Davanagere" style="flex:1; background:#040108; border:1px solid var(--border-purple); padding:10px; color:#fff; border-radius:8px; font-size:0.85rem; outline:none;" onkeypress="if(event.key==='Enter') searchLocationOnMap();">
+                            <button class="btn btn-primary" style="padding:10px 16px;" onclick="searchLocationOnMap()">Search</button>
                         </div>
                     </div>
 
                     <div style="background:#040108; border:1px solid var(--border-purple); border-radius:12px; padding:12px; display:flex; flex-direction:column; gap:6px; font-size:0.8rem;">
-                        <div style="display:flex; justify-content:space-between;"><span>Destination:</span><strong id="activeDestLabel" style="color:var(--accent-cyan);">Mysuru Palace</strong></div>
-                        <div style="display:flex; justify-content:space-between;"><span>Road Distance:</span><strong id="calcDistance">145 KM</strong></div>
-                        <div style="display:flex; justify-content:space-between;"><span>Battery Required:</span><strong id="calcBattery" style="color:var(--ola-pink);">107% (Needs 1 Charge Stop)</strong></div>
+                        <div style="display:flex; justify-content:space-between;"><span>Active Destination:</span><strong id="activeDestLabel" style="color:var(--accent-cyan);">Davanagere</strong></div>
+                        <div style="display:flex; justify-content:space-between;"><span>Road Distance:</span><strong id="calcDistance">265 KM</strong></div>
+                        <div style="display:flex; justify-content:space-between;"><span>Battery Drain Required:</span><strong id="calcBattery" style="color:var(--ola-pink);">196% (2 Fast Charge Stops)</strong></div>
                     </div>
 
-                    <h4 style="font-family:var(--font-head); font-size:0.8rem; color:var(--ola-pink);">⚡ Nearby Ola Hypercharger Network</h4>
+                    <h4 style="font-family:var(--font-head); font-size:0.8rem; color:var(--ola-pink);">⚡ Click Any Station Pin below to Route</h4>
                     <div style="display:flex; flex-direction:column; gap:6px; font-size:0.75rem;">
-                        <div style="background:#040108; padding:8px; border-radius:6px; border:1px solid var(--border-purple); cursor:pointer;" onclick="routeToStation(12.9352, 77.6245, 'Koramangala 5th Block Charging Hub', 18)">📍 Koramangala Hub (18 km - 6 Slots Free)</div>
-                        <div style="background:#040108; padding:8px; border-radius:6px; border:1px solid var(--border-purple); cursor:pointer;" onclick="routeToStation(12.8452, 77.6602, 'Electronic City Phase 1 Charger', 24)">📍 Electronic City Hub (24 km - 4 Slots Free)</div>
-                        <div style="background:#040108; padding:8px; border-radius:6px; border:1px solid var(--border-purple); cursor:pointer;" onclick="routeToStation(13.3400, 77.1000, 'Tumakuru Highway Hypercharger', 68)">📍 Tumakuru Highway Station (68 km - 3 Slots Free)</div>
+                        <div style="background:#040108; padding:8px; border-radius:6px; border:1px solid var(--border-purple); cursor:pointer;" onclick="routeToStation(12.9352, 77.6245, 'Koramangala Charging Hub', 18)">📍 Koramangala Hub (18 km - 6 Slots Free)</div>
+                        <div style="background:#040108; padding:8px; border-radius:6px; border:1px solid var(--border-purple); cursor:pointer;" onclick="routeToStation(12.8452, 77.6602, 'Electronic City Phase 1 Hub', 24)">📍 Electronic City Hub (24 km - 4 Slots Free)</div>
+                        <div style="background:#040108; padding:8px; border-radius:6px; border:1px solid var(--border-purple); cursor:pointer;" onclick="routeToStation(13.3400, 77.1000, 'Tumakuru Highway Station', 68)">📍 Tumakuru Highway Station (68 km - 3 Slots Free)</div>
                     </div>
                 </div>
 
@@ -278,7 +278,7 @@
         <!-- TAB 3: SPOTIFY MUSIC & APPS -->
         <section id="app-store" class="tab-content">
             <div class="card-panel">
-                <h3 style="font-family:var(--font-head); margin-bottom:8px;">🎵 Official Spotify Riding Infotainment Stream</h3>
+                <h3 style="font-family:var(--font-head); margin-bottom:8px;">🎵 Spotify Riding Infotainment Stream</h3>
                 <p style="font-size:0.85rem; color:var(--text-sub); margin-bottom:20px;">Embedded Spotify player loaded with high-energy electronic riding tracks.</p>
 
                 <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(320px, 1fr)); gap:20px;">
@@ -362,7 +362,7 @@ endmodule</textarea>
         EV DashLab | ECE Digital System Design & RTL Verification Studio | GitHub Pages Deployment
     </footer>
 
-    <!-- Leaflet JS & Nominatim Geocoder Engine -->
+    <!-- Leaflet JS -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 
     <script>
@@ -449,35 +449,36 @@ endmodule</textarea>
             alert('RTL parameters compiled and applied to dashboard physics!');
         }
 
-        // Live Geocoding Search inside Website Map Frame
-        function searchAndRouteOnMap() {
+        // On-Page Geocoding Map Search Engine (Stays 100% inside the website canvas)
+        function searchLocationOnMap() {
             const query = document.getElementById('customDestInput').value.trim();
             if (!query) return;
 
             document.getElementById('activeDestLabel').innerText = query;
 
-            // Fetch coordinates via OpenStreetMap Nominatim Engine
+            // Fetch latitude and longitude from OpenStreetMap Nominatim Engine
             fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}`)
                 .then(res => res.json())
                 .then(data => {
                     if (data && data.length > 0) {
                         const lat = parseFloat(data[0].lat);
                         const lng = parseFloat(data[0].lon);
-                        drawRouteToCoords(lat, lng, data[0].display_name);
+                        drawRouteOnWebsiteMap(lat, lng, data[0].display_name);
                     } else {
-                        // Fallback approximate calculation
-                        calculateApproxTelemetry(query, 120);
+                        alert('Location not found. Please try entering a major city or spot name.');
                     }
                 })
-                .catch(() => calculateApproxTelemetry(query, 120));
+                .catch(err => {
+                    alert('Search network error. Trying fallback routing...');
+                });
         }
 
-        function drawRouteToCoords(lat, lng, label) {
+        function drawRouteOnWebsiteMap(lat, lng, label) {
             if (!mapInstance) return;
 
             const destCoords = [lat, lng];
 
-            // Calculate Haversine distance in KM
+            // Calculate Haversine road distance
             const R = 6371;
             const dLat = (lat - rnsitCoords[0]) * Math.PI / 180;
             const dLon = (lng - rnsitCoords[1]) * Math.PI / 180;
@@ -485,32 +486,26 @@ endmodule</textarea>
                       Math.cos(rnsitCoords[0] * Math.PI / 180) * Math.cos(lat * Math.PI / 180) *
                       Math.sin(dLon/2) * Math.sin(dLon/2);
             const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-            const distKm = Math.round(R * c * 1.25); // Road multiplier
+            const distKm = Math.round(R * c * 1.25); // Road factor multiplier
 
             const batteryReq = Math.round((distKm / 135) * 100);
             const stops = Math.floor(batteryReq / 90);
 
             document.getElementById('calcDistance').innerText = distKm + " KM";
-            document.getElementById('calcBattery').innerText = batteryReq + "% (" + (stops > 0 ? stops + " Charging Stop(s)" : "Direct Route") + ")";
+            document.getElementById('calcBattery').innerText = batteryReq + "% (" + (stops > 0 ? stops + " Fast Charge Stop(s) Required" : "Direct Route") + ")";
 
             if (routePolyline) mapInstance.removeLayer(routePolyline);
             if (destMarker) mapInstance.removeLayer(destMarker);
 
             destMarker = L.marker(destCoords).addTo(mapInstance).bindPopup(`<b>${label}</b>`).openPopup();
-            routePolyline = L.polyline([rnsitCoords, destCoords], {color: '#ff0055', weight: 4, opacity: 0.8}).addTo(mapInstance);
+            routePolyline = L.polyline([rnsitCoords, destCoords], {color: '#ff0055', weight: 4, opacity: 0.9}).addTo(mapInstance);
             mapInstance.fitBounds(routePolyline.getBounds(), {padding: [40, 40]});
         }
 
         function routeToStation(lat, lng, name, distKm) {
             document.getElementById('customDestInput').value = name;
             document.getElementById('activeDestLabel').innerText = name;
-            drawRouteToCoords(lat, lng, name);
-        }
-
-        function calculateApproxTelemetry(query, defaultKm) {
-            document.getElementById('calcDistance').innerText = defaultKm + " KM";
-            const batReq = Math.round((defaultKm / 135) * 100);
-            document.getElementById('calcBattery').innerText = batReq + "% Charge";
+            drawRouteOnWebsiteMap(lat, lng, name);
         }
 
         // 60 FPS Physics Engine
@@ -533,4 +528,44 @@ endmodule</textarea>
             document.getElementById('powerValue').innerText = pwrRatio + '%';
 
             const motorTxt = document.getElementById('motorStatusText');
-            if (current
+            if (currentSpeed > 0 && !isBraking) {
+                motorTxt.innerText = 'ACTIVE (PWM)';
+                motorTxt.style.color = 'var(--accent-green)';
+            } else if (isBraking) {
+                motorTxt.innerText = 'BRAKE OVERRIDE';
+                motorTxt.style.color = '#ff5252';
+            } else {
+                motorTxt.innerText = 'STANDBY';
+                motorTxt.style.color = '#ff5252';
+            }
+        }, 1000 / 60);
+
+        // Map Canvas Initialization
+        window.addEventListener('DOMContentLoaded', () => {
+            if (typeof L !== 'undefined') {
+                mapInstance = L.map('leafletMap').setView(rnsitCoords, 10);
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '© OpenStreetMap contributors'
+                }).addTo(mapInstance);
+
+                L.marker(rnsitCoords).addTo(mapInstance).bindPopup('<b>Current Origin</b><br>RNSIT Campus, Bengaluru').openPopup();
+
+                // Add Hypercharger Station Markers
+                const stations = [
+                    {lat: 12.9352, lng: 77.6245, name: 'Koramangala Charging Hub (6 Slots Free)', dist: 18},
+                    {lat: 12.8452, lng: 77.6602, name: 'Electronic City Phase 1 Hub (4 Slots Free)', dist: 24},
+                    {lat: 13.3400, lng: 77.1000, name: 'Tumakuru Highway Station (3 Slots Free)', dist: 68}
+                ];
+
+                stations.forEach(s => {
+                    L.marker([s.lat, s.lng]).addTo(mapInstance)
+                     .bindPopup(`<b>⚡ ${s.name}</b><br><button onclick="routeToStation(${s.lat}, ${s.lng}, '${s.name}', ${s.dist})" style="margin-top:6px;padding:4px 8px;background:#ff0055;color:#fff;border:none;border-radius:4px;cursor:pointer;">Route Here</button>`);
+                });
+
+                // Initial Route to Davanagere
+                drawRouteOnWebsiteMap(14.4673, 75.9241, 'Davanagere');
+            }
+        });
+    </script>
+</body>
+</html>
