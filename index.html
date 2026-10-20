@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EV DashLab — Smart EV Dashboard & RTL Verification Studio</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800;900&family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    
+    <!-- Leaflet OpenStreetMap CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+    
+    <!-- Main Stylesheet -->
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body class="dark-theme">
+
+    <!-- Header / Brand Bar -->
+    <header class="app-header">
+        <div class="header-container">
+            <div class="brand">
+                <span class="brand-badge">ECE LAB</span>
+                <h1>EV DashLab <span class="sub-title">| RTL Verification Studio</span></h1>
+            </div>
+            <div class="header-status">
+                <span class="status-indicator" id="syncStatusDot"></span>
+                <span id="syncStatusText">Engine: Demo Mode</span>
+                <span class="time-display" id="headerClock">00:00:00 AM</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Navigation Bar -->
+    <nav class="main-nav">
+        <div class="nav-container">
+            <button class="nav-btn active" data-tab="dashboard">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
+                Dashboard
+            </button>
+            <button class="nav-btn" data-tab="ride-planner">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>
+                Ride Planner
+            </button>
+            <button class="nav-btn" data-tab="rtl-lab">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><line x1="9" y1="1" x2="9" y2="4"/><line x1="15" y1="1" x2="15" y2="4"/><line x1="9" y1="20" x2="9" y2="23"/><line x1="15" y1="20" x2="15" y2="23"/></svg>
+                RTL Lab
+            </button>
+            <button class="nav-btn" data-tab="app-hub">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+                App Hub
+            </button>
+            <button class="nav-btn" data-tab="learn">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+                Learn
+            </button>
+        </div>
+    </nav>
+
+    <!-- Main Content Area -->
+    <main class="content-area">
+
+        <!-- TAB 1: DASHBOARD -->
+        <section id="dashboard" class="tab-content active">
+            <div class="disclaimer-banner">
+                <p>⚠️ <strong>Educational Simulation:</strong> Independent student research tool for ECE coursework. Not affiliated with or connected to any commercial vehicle manufacturer.</p>
+            </div>
+
+            <div class="dashboard-grid">
+                <!-- Instrument Cluster -->
+                <div class="cluster-card">
+                    <div class="cluster-header">
+                        <div class="turn-indicators">
+                            <span class="turn-signal" id="leftSignal">◄</span>
+                            <span class="headlight-icon" id="headlightIcon">💡</span>
+                            <span class="turn-signal" id="rightSignal">►</span>
+                        </div>
+                        <div class="ride-mode-pills">
+                            <button class="mode-pill active" data-mode="ECO">ECO</button>
+                            <button class="mode-pill" data-mode="NORMAL">NORMAL</button>
+                            <button class="mode-pill" data-mode="SPORT">SPORT</button>
+                        </div>
+                    </div>
+
+                    <div class="speedometer-display">
+                        <div class="speed-value" id="speedDisplay">0</div>
+                        <div class="speed-unit">KM/H</div>
+                        <div class="rpm-bar-container">
+                            <div class="rpm-bar-fill" id="rpmFill"></div>
+                        </div>
+                        <div class="rpm-label">MOTOR POWER <span id="powerPercent">0%</span></div>
+                    </div>
+
+                    <div class="cluster-footer">
+                        <div class="telemetry-item">
+                            <span class="label">BATTERY</span>
+                            <span class="value" id="batteryPercent">88%</span>
+                            <div class="battery-bar"><div class="battery-fill" style="width: 88%;"></div></div>
+                        </div>
+                        <div class="telemetry-item">
+                            <span class="label">EST. RANGE</span>
+                            <span class="value" id="rangeKm">114 KM</span>
+                        </div>
+                        <div class="telemetry-item">
+                            <span class="label">ODO / TRIP</span>
+                            <span class="value" id="odoKm">1,240.5 KM</span>
+                        </div>
+                        <div class="telemetry-item">
+                            <span class="label">MOTOR STATUS</span>
+                            <span class="value status-badge" id="motorStateBadge">OFF</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Hardware Controls Panel -->
+                <div class="controls-card">
+                    <h3>Vehicle Controls</h3>
+                    <p class="section-desc">Operate controls below to test real-time throttle & brake response.</p>
+
+                    <!-- Throttle Slider -->
+                    <div class="control-group">
+                        <div class="control-label">
+                            <label for="throttleSlider">Accelerator Pedal / Throttle</label>
+                            <span class="control-val" id="throttleVal">0%</span>
+                        </div>
+                        <input type="range" id="throttleSlider" min="0" max="100" value="0" class="slider throttle-slider">
+                    </div>
+
+                    <!-- Brake Control -->
+                    <div class="control-group">
+                        <div class="control-label">
+                            <label>Mechanical / Regenerative Brake</label>
+                            <span class="control-val" id="brakeVal">RELEASED</span>
+                        </div>
+                        <button class="btn btn-brake" id="brakeBtn">APPLY BRAKE</button>
+                    </div>
+
+                    <!-- Secondary Controls -->
+                    <div class="control-grid">
+                        <button class="btn btn-secondary" id="toggleLeftSigBtn">Turn Left</button>
+                        <button class="btn btn-secondary" id="toggleHeadlightBtn">Headlights</button>
+                        <button class="btn btn-secondary" id="toggleRightSigBtn">Turn Right</button>
+                        <button class="btn btn-danger" id="resetVehicleBtn">Emergency Cutoff</button>
+                    </div>
+
+                    <!-- Mode Info Box -->
+                    <div class="engine-info-box">
+                        <div class="info-row">
+                            <span>Active Engine Mode:</span>
+                            <strong id="activeModeText">Demo Mode (JS Physics)</strong>
+                        </div>
+                        <div class="info-row">
+                            <span>RTL Verification Sync:</span>
+                            <strong id="rtlSyncText">UNVERIFIED</strong>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB 2: RIDE PLANNER -->
+        <section id="ride-planner" class="tab-content">
+            <div class="planner-grid">
+                <div class="planner-sidebar">
+                    <h3>Route & Range Planner</h3>
+                    <p class="section-desc">Plan routes using OpenStreetMap and evaluate battery safety margins.</p>
+                    
+                    <div class="form-group">
+                        <label for="startPoint">Start Location</label>
+                        <input type="text" id="startPoint" value="RNS Institute of Technology, Bengaluru" class="input-field">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="destPoint">Destination Location</label>
+                        <input type="text" id="destPoint" value="Electronic City Phase 1, Bengaluru" class="input-field">
+                    </div>
+
+                    <div class="button-group">
+                        <button class="btn btn-primary" id="calculateRouteBtn">Calculate Route</button>
+                        <button class="btn btn-secondary" id="useLocationBtn">Use GPS Location</button>
+                    </div>
+
+                    <div class="route-summary-card">
+                        <h4>Trip Telemetry Estimates</h4>
+                        <div class="summary-row"><span>Estimated Distance:</span> <strong id="routeDistance">24.5 km</strong></div>
+                        <div class="summary-row"><span>Estimated Travel Time:</span> <strong id="routeTime">45 mins</strong></div>
+                        <div class="summary-row"><span>Battery Required:</span> <strong id="batteryReq">22%</strong></div>
+                        <div class="summary-row"><span>Remaining Charge at Arrival:</span> <strong id="batteryArrival">66%</strong></div>
+                        <div class="summary-row"><span>Range Safety Margin:</span> <span class="badge badge-success" id="rangeSafetyBadge">SAFE</span></div>
+                    </div>
+
+                    <div class="disclaimer-text">
+                        ℹ️ Predicted range depends on weight, incline, temperature, and speed. Location data remains in your browser session.
+                    </div>
+                </div>
+
+                <div class="planner-map-container">
+                    <div id="map" class="map-view"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB 3: RTL LAB -->
+        <section id="rtl-lab" class="tab-content">
+            <div class="rtl-grid">
+                <div class="rtl-editor-container">
+                    <div class="editor-header">
+                        <div class="editor-tabs">
+                            <button class="editor-tab-btn active" id="btnTabRtl">Design Under Test (RTL)</button>
+                            <button class="editor-tab-btn" id="btnTabTb">Testbench Code (TB)</button>
+                        </div>
+                        <div class="editor-actions">
+                            <button class="btn btn-sm btn-secondary" id="btnCopyCode">Copy Active Code</button>
+                            <button class="btn btn-sm btn-secondary" id="btnLoadSample">Load Default Sample</button>
+                        </div>
+                    </div>
+
+                    <!-- RTL Code Panel -->
+                    <div class="code-panel active" id="panelRtl">
+                        <textarea id="rtlCodeInput" class="code-editor" spellcheck="false"></textarea>
+                    </div>
+
+                    <!-- Testbench Code Panel -->
+                    <div class="code-panel" id="panelTb">
+                        <textarea id="tbCodeInput" class="code-editor" spellcheck="false"></textarea>
+                    </div>
+                </div>
+
+                <!-- Simulation Workflow Panel -->
+                <div class="rtl-sidebar">
+                    <h3>Simulation & Verification Workbench</h3>
+                    <p class="section-desc">Run external HDL simulation or parse VCD output logs to drive the dashboard.</p>
+
+                    <div class="workflow-card">
+                        <h4>Step 1: External Simulation</h4>
+                        <p>GitHub Pages cannot directly compile SystemVerilog binaries. Run the code in EDA Playground or a local compiler (iverilog/verilator):</p>
+                        <a href="https://www.edaplayground.com" target="_blank" rel="noopener" class="btn btn-primary btn-block">Open EDA Playground ↗</a>
+                    </div>
+
+                    <div class="workflow-card">
+                        <h4>Step 2: Import Simulator Results</h4>
+                        <p>Paste the console terminal output or VCD log below to verify RTL logic correctness:</p>
+                        <textarea id="simulatorLogInput" class="log-editor" placeholder="Paste simulation log or VCD file contents here..."></textarea>
+                        <button class="btn btn-success btn-block" id="btnParseLog">Parse & Sync Dashboard</button>
+                    </div>
+
+                    <div class="workflow-card">
+                        <h4>Verification Summary</h4>
+                        <div class="status-box" id="verificationSummaryBox">
+                            <div class="status-title" id="verifStatusTitle">UNVERIFIED</div>
+                            <div class="status-details" id="verifStatusDetails">No external simulation results imported yet. Running on standard Demo Mode.</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB 4: APP HUB -->
+        <section id="app-hub" class="tab-content">
+            <div class="app-hub-grid">
+                <div class="app-card">
+                    <div class="app-icon">📊</div>
+                    <h3>Ride Analytics</h3>
+                    <p>Track historical energy efficiency, watt-hours per kilometer, and peak acceleration metrics.</p>
+                    <div class="stat-highlight">Average Efficiency: <strong>18 Wh/km</strong></div>
+                </div>
+
+                <div class="app-card">
+                    <div class="app-icon">🔧</div>
+                    <h3>Maintenance & Diagnostic</h3>
+                    <p>Read diagnostic trouble codes (DTC), verify tire pressure, and review motor controller health.</p>
+                    <div class="stat-highlight">System Health: <strong>100% OK</strong></div>
+                </div>
+
+                <div class="app-card">
+                    <div class="app-icon">📚</div>
+                    <h3>RTL Module Library</h3>
+                    <p>Pre-written Verilog design blocks including PWM generators, debouncers, and CAN-bus interfaces.</p>
+                    <button class="btn btn-sm btn-secondary" onclick="switchTab('rtl-lab')">Open Code Lab</button>
+                </div>
+
+                <div class="app-card">
+                    <div class="app-icon">⚙️</div>
+                    <h3>System Settings</h3>
+                    <p>Configure dashboard unit preferences, simulator refresh rates, and theme settings.</p>
+                    <div class="stat-highlight">Units: <strong>Metric (KM/H)</strong></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB 5: LEARN -->
+        <section id="learn" class="tab-content">
+            <div class="learn-container">
+                <h2>System Architecture & Verification Guide</h2>
+                <p>Welcome to the EV DashLab engineering guide. This section explains the hardware logic model, testbench structure, and verification concepts.</p>
+
+                <div class="doc-section">
+                    <h3>1. System Architecture</h3>
+                    <p>The speed controller logic operates on a 50 MHz system clock, taking an 8-bit digital throttle input (`0-255`), a 2-bit ride mode selector, and a 1-bit brake signal. It outputs an 8-bit target speed along with a PWM motor drive signal.</p>
+                </div>
+
+                <div class="doc-section">
+                    <h3>2. Safety-Critical Priority Logic</h3>
+                    <p>In standard vehicle safety logic, mechanical braking input override must execute with top priority over accelerator commands. When `brake_in == 1'b1`, the target speed drops to `0`, and `pwm_out` drops to `1'b0` within a single clock cycle.</p>
+                </div>
+
+                <div class="doc-section">
+                    <h3>3. How to Run External Simulations</h3>
+                    <ol>
+                        <li>Copy the RTL design and testbench from the <strong>RTL Lab</strong> tab.</li>
+                        <li>Open <a href="https://www.edaplayground.com" target="_blank" rel="noopener">EDA Playground</a> and select <strong>Icarus Verilog 12.0</strong> or <strong>Verilator</strong> as the simulator.</li>
+                        <li>Paste the RTL into `design.sv` and the testbench into `testbench.sv`.</li>
+                        <li>Check <strong>"Open EPWave after run"</strong> and click <strong>Run</strong>.</li>
+                        <li>Copy the terminal execution log and paste it back into EV DashLab to unlock verified hardware mode!</li>
+                    </ol>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="app-footer">
+        <div class="footer-container">
+            <p>EV DashLab | ECE Digital System Design & RTL Verification Project | Hosted on GitHub Pages</p>
+        </div>
+    </footer>
+
+    <!-- Leaflet OpenStreetMap JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    
+    <!-- Application Logic -->
+    <script src="js/app.js"></script>
+</body>
+</html>
