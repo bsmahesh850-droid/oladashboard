@@ -3,12 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EV DashLab — Ola S1 Pro Digital Twin & Google Maps Navigation</title>
+    <title>EV DashLab — Ola S1 Pro Digital Twin & Telemetry Engine</title>
 
-    <!-- Google Fonts -->
+    <!-- Google Fonts & Leaflet Routing CSS -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800;900&family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
 
     <style>
         :root {
@@ -38,7 +39,6 @@
             flex-direction: column;
         }
 
-        /* Top Header */
         .app-header {
             background: #020005;
             border-bottom: 1px solid var(--border-purple);
@@ -55,7 +55,6 @@
         }
         .time-display { font-family: var(--font-head); color: var(--accent-cyan); font-weight: 700; }
 
-        /* Navigation */
         .main-nav { background: var(--bg-card); border-bottom: 1px solid var(--border-purple); }
         .nav-container { max-width: 1400px; margin: 0 auto; display: flex; gap: 8px; padding: 0 24px; overflow-x: auto; }
         .nav-btn {
@@ -71,7 +70,6 @@
         .tab-content { display: none; }
         .tab-content.active { display: block; }
 
-        /* Layout Grids */
         .dash-grid { display: grid; grid-template-columns: 1fr 420px; gap: 24px; }
         @media (max-width: 1024px) { .dash-grid { grid-template-columns: 1fr; } }
 
@@ -82,7 +80,6 @@
             box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6);
         }
 
-        /* Cluster Display */
         .cluster-top { display: flex; justify-content: space-between; align-items: center; }
         .turn-signals { display: flex; gap: 16px; font-size: 1.25rem; color: #2a1548; }
         .turn-signal.active { color: var(--accent-green); text-shadow: 0 0 12px var(--accent-green); }
@@ -115,7 +112,6 @@
         .tele-item .lbl { font-size: 0.65rem; color: var(--text-sub); font-weight: 700; font-family: var(--font-head); }
         .tele-item .val { font-family: var(--font-head); font-size: 0.9rem; }
 
-        /* Controls */
         .ctrl-group { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; }
         .slider-custom {
             width: 100%; height: 10px; border-radius: 5px; background: #040108; outline: none; -webkit-appearance: none; border: 1px solid var(--border-purple);
@@ -132,17 +128,21 @@
         .btn-brake.active { background: #ff5252; color: #fff; box-shadow: 0 0 20px #ff5252; }
         .btn-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 
-        /* Google Maps & Routing Layout */
         .map-layout { display: grid; grid-template-columns: 420px 1fr; gap: 24px; height: 640px; }
         @media (max-width: 900px) { .map-layout { grid-template-columns: 1fr; height: auto; } }
         .map-box { border-radius: 20px; overflow: hidden; border: 1px solid var(--border-purple); min-height: 450px; background: #040108; }
 
-        /* RTL Lab Layout */
         .rtl-layout { display: grid; grid-template-columns: 1fr 380px; gap: 24px; height: 650px; }
         @media (max-width: 1024px) { .rtl-layout { grid-template-columns: 1fr; } }
         .code-area { width: 100%; height: 100%; background: #020005; color: #e2e8f0; font-family: var(--font-code); font-size: 0.85rem; padding: 16px; border: none; outline: none; resize: none; line-height: 1.5; }
 
         .app-footer { background: #020005; border-top: 1px solid var(--border-purple); padding: 16px; text-align: center; font-size: 0.8rem; color: var(--text-sub); margin-top: auto; }
+        
+        .station-btn {
+            background: #040108; padding: 8px 12px; border-radius: 8px; border: 1px solid var(--border-purple);
+            color: #fff; cursor: pointer; text-align: left; font-size: 0.75rem; transition: 0.2s;
+        }
+        .station-btn:hover { border-color: var(--ola-pink); background: rgba(255, 0, 85, 0.1); }
     </style>
 </head>
 <body>
@@ -163,7 +163,7 @@
     <nav class="main-nav">
         <div class="nav-container">
             <button class="nav-btn active" onclick="switchTab('dashboard')">⚡ Live Dashboard</button>
-            <button class="nav-btn" onclick="switchTab('map-planner')">🗺️ Google Maps & Chargers</button>
+            <button class="nav-btn" onclick="switchTab('map-planner')">🗺️ GPS Routing & Chargers</button>
             <button class="nav-btn" onclick="switchTab('app-store')">🎵 Spotify Audio & Apps</button>
             <button class="nav-btn" onclick="switchTab('rtl-lab')">💻 RTL Hardware Studio</button>
         </div>
@@ -240,37 +240,37 @@
             </div>
         </section>
 
-        <!-- TAB 2: GOOGLE MAPS & CHARGING STATIONS -->
+        <!-- TAB 2: ROUTING & CHARGING STATIONS -->
         <section id="map-planner" class="tab-content">
             <div class="map-layout">
                 <div class="card-panel" style="display:flex; flex-direction:column; gap:12px;">
-                    <h3 style="font-family:var(--font-head);">🗺️ Google Maps Navigation</h3>
+                    <h3 style="font-family:var(--font-head);">🗺️ Dynamic OSRM Road Router</h3>
                     
                     <div class="ctrl-group" style="margin:0;">
-                        <label style="font-size:0.75rem; color:var(--text-sub);">Search Destination (Updates Google Map Live)</label>
+                        <label style="font-size:0.75rem; color:var(--text-sub);">Search Destination City/Spot</label>
                         <div style="display:flex; gap:6px;">
-                            <input type="text" id="customDestInput" placeholder="Enter destination..." value="Mysuru Palace" style="flex:1; background:#040108; border:1px solid var(--border-purple); padding:8px; color:#fff; border-radius:8px; font-size:0.8rem; outline:none;" onkeypress="if(event.key==='Enter') updateGoogleMapDestination();">
-                            <button class="btn btn-primary" style="padding:8px 14px;" onclick="updateGoogleMapDestination()">Search</button>
+                            <input type="text" id="customDestInput" placeholder="Enter Mysuru, Davanagere, Airport..." value="Mysuru" style="flex:1; background:#040108; border:1px solid var(--border-purple); padding:8px; color:#fff; border-radius:8px; font-size:0.8rem; outline:none;" onkeypress="if(event.key==='Enter') executeLiveRouteSearch();">
+                            <button class="btn btn-primary" style="padding:8px 14px;" onclick="executeLiveRouteSearch()">Route</button>
                         </div>
                     </div>
 
                     <div style="background:#040108; border:1px solid var(--border-purple); border-radius:12px; padding:12px; display:flex; flex-direction:column; gap:6px; font-size:0.8rem;">
-                        <div style="display:flex; justify-content:space-between;"><span>Destination:</span><strong id="activeDestLabel" style="color:var(--accent-cyan);">Mysuru Palace</strong></div>
-                        <div style="display:flex; justify-content:space-between;"><span>Road Distance:</span><strong id="calcDistance">145 KM</strong></div>
-                        <div style="display:flex; justify-content:space-between;"><span>Battery Required:</span><strong id="calcBattery" style="color:var(--ola-pink);">107% (1 Charge Stop Needed)</strong></div>
+                        <div style="display:flex; justify-content:space-between;"><span>Active Route:</span><strong id="activeDestLabel" style="color:var(--accent-cyan);">Mysuru</strong></div>
+                        <div style="display:flex; justify-content:space-between;"><span>Actual Road Distance:</span><strong id="calcDistance" style="color:var(--accent-cyan);">Calculating...</strong></div>
+                        <div style="display:flex; justify-content:space-between;"><span>Driving Duration:</span><strong id="calcDuration" style="color:var(--accent-amber);">Calculating...</strong></div>
+                        <div style="display:flex; justify-content:space-between;"><span>Battery Consumed:</span><strong id="calcBattery" style="color:var(--ola-pink);">Calculating...</strong></div>
                     </div>
 
-                    <h4 style="font-family:var(--font-head); font-size:0.8rem; color:var(--ola-pink);">⚡ Route Charging Stations</h4>
-                    <div style="display:flex; flex-direction:column; gap:6px; font-size:0.75rem;">
-                        <div style="background:#040108; padding:8px; border-radius:6px; border:1px solid var(--border-purple); cursor:pointer;" onclick="setChargerDestination('Ramanagara Highway Hypercharger Station', 48)">📍 Ramanagara Highway Hub (48 km - On Mysuru Route)</div>
-                        <div style="background:#040108; padding:8px; border-radius:6px; border:1px solid var(--border-purple); cursor:pointer;" onclick="setChargerDestination('Mandya Bypass Fast Charger Hub', 98)">📍 Mandya Bypass Hub (98 km - On Mysuru Route)</div>
-                        <div style="background:#040108; padding:8px; border-radius:6px; border:1px solid var(--border-purple); cursor:pointer;" onclick="setChargerDestination('Tumakuru Highway Hypercharger Station', 68)">📍 Tumakuru Highway Station (68 km - On North Route)</div>
+                    <h4 style="font-family:var(--font-head); font-size:0.8rem; color:var(--ola-pink);">⚡ Live Route Fast Charging Hubs</h4>
+                    <div style="display:flex; flex-direction:column; gap:6px;" id="chargerListContainer">
+                        <button class="station-btn" onclick="routeToStation(12.7212, 77.2814, 'Ramanagara Highway Hypercharger', 'Mysuru Highway')">📍 Ramanagara Hub (48 km - On Mysuru Route)</button>
+                        <button class="station-btn" onclick="routeToStation(12.5218, 76.8951, 'Mandya Bypass Fast Charger Hub', 'Mysuru Highway')">📍 Mandya Bypass Hub (98 km - On Mysuru Route)</button>
+                        <button class="station-btn" onclick="routeToStation(13.3400, 77.1000, 'Tumakuru Highway Hypercharger', 'Tumakuru Highway')">📍 Tumakuru Highway Hub (68 km - On North Route)</button>
                     </div>
                 </div>
 
                 <div class="map-box">
-                    <!-- Original Google Maps Embed Container -->
-                    <iframe id="googleMapFrame" width="100%" height="100%" style="border:0;" allowfullscreen="" loading="lazy" src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3889.98!2d77.5186!3d12.9011!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3bae3fa!2sMysuru%20Palace!5e0!3m2!1sen!2sin!4v1710000000000"></iframe>
+                    <div id="leafletMap" style="width:100%; height:100%;"></div>
                 </div>
             </div>
         </section>
@@ -278,7 +278,7 @@
         <!-- TAB 3: SPOTIFY MUSIC & APPS -->
         <section id="app-store" class="tab-content">
             <div class="card-panel">
-                <h3 style="font-family:var(--font-head); margin-bottom:8px;">🎵 Official Spotify Riding Infotainment Stream</h3>
+                <h3 style="font-family:var(--font-head); margin-bottom:8px;">🎵 Spotify Riding Infotainment Stream</h3>
                 <p style="font-size:0.85rem; color:var(--text-sub); margin-bottom:20px;">Embedded Spotify player loaded with high-energy electronic riding tracks.</p>
 
                 <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(320px, 1fr)); gap:20px;">
@@ -362,6 +362,9 @@ endmodule</textarea>
         EV DashLab | ECE Digital System Design & RTL Verification Studio | GitHub Pages Deployment
     </footer>
 
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
     <script>
         // Vehicle State
         let currentSpeed = 0;
@@ -369,6 +372,11 @@ endmodule</textarea>
         let isBraking = false;
         let activeMode = 'HYPER';
         let rtlSpeedCaps = { ECO: 45, NORMAL: 75, SPORT: 100, HYPER: 115 };
+
+        const originRNSIT = [12.9011, 77.5186]; // Lat, Lon
+        let mapInstance = null;
+        let routeGeoJsonLayer = null;
+        let targetMarker = null;
 
         setInterval(() => {
             document.getElementById('clockText').innerText = new Date().toLocaleTimeString();
@@ -379,6 +387,10 @@ endmodule</textarea>
             document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
             document.getElementById(tabId).classList.add('active');
             event.currentTarget.classList.add('active');
+
+            if (tabId === 'map-planner' && mapInstance) {
+                setTimeout(() => mapInstance.invalidateSize(), 200);
+            }
         }
 
         function setMode(mode, el) {
@@ -437,44 +449,72 @@ endmodule</textarea>
             alert('RTL parameters compiled and applied to dashboard physics!');
         }
 
-        // Google Maps Search & Accurate Route Distance Engine
-        function updateGoogleMapDestination() {
-            const dest = document.getElementById('customDestInput').value.trim();
-            if (!dest) return;
+        // Live Geocoding + True OSRM Road Distance Calculation
+        function executeLiveRouteSearch() {
+            const destName = document.getElementById('customDestInput').value.trim();
+            if (!destName) return;
 
-            document.getElementById('activeDestLabel').innerText = dest;
-            
-            let dist = 145;
-            const lower = dest.toLowerCase();
-            if (lower.includes('mysuru') || lower.includes('mysore')) { dist = 145; }
-            else if (lower.includes('davanagere')) { dist = 265; }
-            else if (lower.includes('airport')) { dist = 42; }
-            else if (lower.includes('ecity') || lower.includes('electronic')) { dist = 24; }
-            else if (lower.includes('ramanagara')) { dist = 48; }
-            else if (lower.includes('mandya')) { dist = 98; }
-            else if (lower.includes('tumakuru')) { dist = 68; }
-            else { dist = Math.floor(Math.random() * 120) + 30; }
+            document.getElementById('activeDestLabel').innerText = destName;
+            document.getElementById('calcDistance').innerText = "Querying GPS...";
 
-            const batReq = Math.round((dist / 135) * 100);
-            const stops = Math.floor(batReq / 90);
-
-            document.getElementById('calcDistance').innerText = dist + " KM";
-            document.getElementById('calcBattery').innerText = batReq + "% (" + (stops > 0 ? stops + " Charge Stop(s) Needed" : "Direct Route") + ")";
-
-            // Update Official Google Maps Embed Dynamically
-            const mapUrl = `https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3889.98!2d77.5186!3d12.9011!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3bae3fa!2s${encodeURIComponent(dest)}!5e0!3m2!1sen!2sin!4v1710000000000`;
-            document.getElementById('googleMapFrame').src = mapUrl;
+            fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(destName)}`)
+                .then(r => r.json())
+                .then(data => {
+                    if (data && data.length > 0) {
+                        const targetLat = parseFloat(data[0].lat);
+                        const targetLon = parseFloat(data[0].lon);
+                        fetchOSRMRealRoadRoute(targetLat, targetLon, data[0].display_name);
+                    } else {
+                        alert("Destination not found. Try searching a major city or spot.");
+                    }
+                })
+                .catch(() => alert("Geocoding service error. Check connection."));
         }
 
-        function setChargerDestination(stationName, distKm) {
-            document.getElementById('customDestInput').value = stationName;
-            updateGoogleMapDestination();
-            document.getElementById('calcDistance').innerText = distKm + " KM";
-            const batReq = Math.round((distKm / 135) * 100);
-            document.getElementById('calcBattery').innerText = batReq + "% (Direct to Charging Hub)";
+        function fetchOSRMRealRoadRoute(destLat, destLon, label) {
+            const osrmUrl = `https://router.project-osrm.org/route/v1/driving/${originRNSIT[1]},${originRNSIT[0]};${destLon},${destLat}?overview=full&geometries=geojson`;
+
+            fetch(osrmUrl)
+                .then(r => r.json())
+                .then(res => {
+                    if (res.routes && res.routes.length > 0) {
+                        const route = res.routes[0];
+                        const distanceKm = (route.distance / 1000).toFixed(1);
+                        const durationMins = Math.round(route.duration / 60);
+
+                        const hrs = Math.floor(durationMins / 60);
+                        const mins = durationMins % 60;
+                        const durationStr = hrs > 0 ? `${hrs} hrs ${mins} mins` : `${mins} mins`;
+
+                        // Battery Drain Curve Math (135 km max range per full charge)
+                        const batteryPercent = Math.round((distanceKm / 135) * 100);
+                        const stopsRequired = Math.floor(batteryPercent / 90);
+
+                        document.getElementById('calcDistance').innerText = distanceKm + " KM";
+                        document.getElementById('calcDuration').innerText = durationStr;
+                        document.getElementById('calcBattery').innerText = `${batteryPercent}% (${stopsRequired > 0 ? stopsRequired + " Fast Stop(s) Required" : "Direct Route"})`;
+
+                        // Draw Real Geometry on Leaflet Map
+                        if (routeGeoJsonLayer) mapInstance.removeLayer(routeGeoJsonLayer);
+                        if (targetMarker) mapInstance.removeLayer(targetMarker);
+
+                        targetMarker = L.marker([destLat, destLon]).addTo(mapInstance).bindPopup(`<b>${label}</b>`).openPopup();
+                        routeGeoJsonLayer = L.geoJSON(route.geometry, {
+                            style: { color: '#ff0055', weight: 5, opacity: 0.9 }
+                        }).addTo(mapInstance);
+
+                        mapInstance.fitBounds(routeGeoJsonLayer.getBounds(), { padding: [40, 40] });
+                    }
+                });
         }
 
-        // 60 FPS Physics Engine
+        function routeToStation(lat, lon, name) {
+            document.getElementById('customDestInput').value = name;
+            document.getElementById('activeDestLabel').innerText = name;
+            fetchOSRMRealRoadRoute(lat, lon, name);
+        }
+
+        // 60 FPS Physics Loop
         setInterval(() => {
             const cap = rtlSpeedCaps[activeMode];
 
@@ -505,6 +545,21 @@ endmodule</textarea>
                 motorTxt.style.color = '#ff5252';
             }
         }, 1000 / 60);
+
+        // Map Canvas Setup
+        window.addEventListener('DOMContentLoaded', () => {
+            if (typeof L !== 'undefined') {
+                mapInstance = L.map('leafletMap').setView(originRNSIT, 10);
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '© OpenStreetMap contributors'
+                }).addTo(mapInstance);
+
+                L.marker(originRNSIT).addTo(mapInstance).bindPopup('<b>Current Origin</b><br>RNSIT Campus, Bengaluru').openPopup();
+
+                // Initial Route Calculation to Mysuru
+                fetchOSRMRealRoadRoute(12.3051, 76.6551, 'Mysuru Palace');
+            }
+        });
     </script>
 </body>
 </html>
