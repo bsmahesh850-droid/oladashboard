@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EV DashLab — Ola S1 Pro Digital Twin & Telemetry Engine</title>
+    <title>EV DashLab — Ola S1 Pro Smart Dashboard & Digital Twin</title>
 
-    <!-- Google Fonts & Leaflet Routing CSS -->
+    <!-- Google Fonts & Leaflet OpenStreetMap CSS -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800;900&family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
@@ -39,6 +39,7 @@
             flex-direction: column;
         }
 
+        /* App Header */
         .app-header {
             background: #020005;
             border-bottom: 1px solid var(--border-purple);
@@ -55,6 +56,7 @@
         }
         .time-display { font-family: var(--font-head); color: var(--accent-cyan); font-weight: 700; }
 
+        /* Main Nav */
         .main-nav { background: var(--bg-card); border-bottom: 1px solid var(--border-purple); }
         .nav-container { max-width: 1400px; margin: 0 auto; display: flex; gap: 8px; padding: 0 24px; overflow-x: auto; }
         .nav-btn {
@@ -70,6 +72,7 @@
         .tab-content { display: none; }
         .tab-content.active { display: block; }
 
+        /* Dashboard Layout */
         .dash-grid { display: grid; grid-template-columns: 1fr 420px; gap: 24px; }
         @media (max-width: 1024px) { .dash-grid { grid-template-columns: 1fr; } }
 
@@ -80,6 +83,7 @@
             box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6);
         }
 
+        /* Cluster Display */
         .cluster-top { display: flex; justify-content: space-between; align-items: center; }
         .turn-signals { display: flex; gap: 16px; font-size: 1.25rem; color: #2a1548; }
         .turn-signal.active { color: var(--accent-green); text-shadow: 0 0 12px var(--accent-green); }
@@ -112,6 +116,7 @@
         .tele-item .lbl { font-size: 0.65rem; color: var(--text-sub); font-weight: 700; font-family: var(--font-head); }
         .tele-item .val { font-family: var(--font-head); font-size: 0.9rem; }
 
+        /* Handlebar Controls */
         .ctrl-group { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; }
         .slider-custom {
             width: 100%; height: 10px; border-radius: 5px; background: #040108; outline: none; -webkit-appearance: none; border: 1px solid var(--border-purple);
@@ -128,10 +133,12 @@
         .btn-brake.active { background: #ff5252; color: #fff; box-shadow: 0 0 20px #ff5252; }
         .btn-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 
+        /* Maps & Routing */
         .map-layout { display: grid; grid-template-columns: 420px 1fr; gap: 24px; height: 640px; }
         @media (max-width: 900px) { .map-layout { grid-template-columns: 1fr; height: auto; } }
-        .map-box { border-radius: 20px; overflow: hidden; border: 1px solid var(--border-purple); min-height: 450px; background: #040108; }
+        .map-box { border-radius: 20px; overflow: hidden; border: 1px solid var(--border-purple); min-height: 450px; background: #040108; position: relative; }
 
+        /* RTL Lab Layout */
         .rtl-layout { display: grid; grid-template-columns: 1fr 380px; gap: 24px; height: 650px; }
         @media (max-width: 1024px) { .rtl-layout { grid-template-columns: 1fr; } }
         .code-area { width: 100%; height: 100%; background: #020005; color: #e2e8f0; font-family: var(--font-code); font-size: 0.85rem; padding: 16px; border: none; outline: none; resize: none; line-height: 1.5; }
@@ -171,7 +178,7 @@
 
     <main class="content-area">
 
-        <!-- TAB 1: DASHBOARD -->
+        <!-- TAB 1: LIVE DASHBOARD -->
         <section id="dashboard" class="tab-content active">
             <div class="dash-grid">
                 
@@ -231,41 +238,71 @@
                         <button class="btn btn-secondary" onclick="playElectricHorn()">Horn Sound 🔊</button>
                     </div>
 
-                    <div style="background:#040108; border:1px solid var(--border-purple); border-radius:12px; padding:12px; font-size:0.75rem; display:flex; flex-direction:column; gap:6px;">
+                    <div style="background:#040108; border:1px solid var(--border-purple); border-radius:12px; padding:12px; font-size:0.75rem; display:flex; flex-direction:column; gap:6px; margin-bottom:16px;">
                         <div style="display:flex; justify-content:space-between;"><span>Active RTL Speed Cap:</span><strong id="rtlCapText" style="color:var(--accent-cyan);">115 KM/H (HYPER)</strong></div>
                         <div style="display:flex; justify-content:space-between;"><span>Safety Priority Rule:</span><strong style="color:var(--accent-green);">Brake Override Active</strong></div>
                     </div>
+
+                    <!-- PHONE & WI-FI CONNECTIVITY MODULE -->
+                    <div style="background:#040108; border:1px solid var(--border-purple); border-radius:12px; padding:14px; font-size:0.8rem; display:flex; flex-direction:column; gap:10px;">
+                        <div style="display:flex; justify-content:space-between; align-items:center;">
+                            <strong style="font-family:var(--font-head); color:var(--accent-cyan);">📞 Phone & Hotspot Hub</strong>
+                            <span id="phoneConnStatus" style="color:var(--accent-green); font-weight:bold;">CONNECTED</span>
+                        </div>
+
+                        <div style="display:flex; flex-direction:column; gap:4px; font-size:0.75rem; color:var(--text-sub);">
+                            <div>Phone Number: <strong style="color:var(--text-main);">+91 7349071733</strong></div>
+                            <div>Wi-Fi Hotspot: <strong style="color:var(--text-main);">vivo Y400 Pro 5G</strong></div>
+                            <div>Wi-Fi Password: <strong style="color:var(--accent-amber);">Mahesh@2005</strong></div>
+                        </div>
+
+                        <!-- Call Overlay -->
+                        <div id="callDisplayBox" style="background:#0d051c; border:1px solid var(--border-purple); padding:8px; border-radius:8px; text-align:center; display:none;">
+                            <div style="font-size:0.7rem; color:var(--ola-pink); font-family:var(--font-head);">INCOMING CALL</div>
+                            <div style="font-weight:bold; color:#fff; margin:2px 0;">+91 7349071733</div>
+                            <div style="display:flex; gap:6px; justify-content:center; margin-top:6px;">
+                                <button class="btn" style="padding:4px 10px; font-size:0.7rem; background:var(--accent-green); color:#000;" onclick="answerCall()">Accept</button>
+                                <button class="btn" style="padding:4px 10px; font-size:0.7rem; background:#ff5252; color:#fff;" onclick="rejectCall()">Decline</button>
+                            </div>
+                        </div>
+
+                        <div style="display:flex; gap:6px; margin-top:4px;">
+                            <button class="btn btn-secondary" style="flex:1; padding:6px; font-size:0.7rem;" onclick="triggerSimulatedCall()">Simulate Call</button>
+                            <button class="btn btn-secondary" style="flex:1; padding:6px; font-size:0.7rem;" onclick="togglePhoneConn()">Disconnect</button>
+                        </div>
+                    </div>
+
                 </div>
 
             </div>
         </section>
 
-        <!-- TAB 2: ROUTING & CHARGING STATIONS -->
+        <!-- TAB 2: ROUTING & MAP SEARCH -->
         <section id="map-planner" class="tab-content">
             <div class="map-layout">
                 <div class="card-panel" style="display:flex; flex-direction:column; gap:12px;">
-                    <h3 style="font-family:var(--font-head);">🗺️ Dynamic OSRM Road Router</h3>
+                    <h3 style="font-family:var(--font-head);">🗺️ On-Page GPS Navigation Engine</h3>
                     
                     <div class="ctrl-group" style="margin:0;">
-                        <label style="font-size:0.75rem; color:var(--text-sub);">Search Destination City/Spot</label>
+                        <label style="font-size:0.75rem; color:var(--text-sub);">Search Destination City/Spot (On-Page Map Zoom)</label>
                         <div style="display:flex; gap:6px;">
-                            <input type="text" id="customDestInput" placeholder="Enter Mysuru, Davanagere, Airport..." value="Mysuru" style="flex:1; background:#040108; border:1px solid var(--border-purple); padding:8px; color:#fff; border-radius:8px; font-size:0.8rem; outline:none;" onkeypress="if(event.key==='Enter') executeLiveRouteSearch();">
-                            <button class="btn btn-primary" style="padding:8px 14px;" onclick="executeLiveRouteSearch()">Route</button>
+                            <input type="text" id="customDestInput" placeholder="Enter Davanagere, Mysuru, Airport..." value="Davanagere" style="flex:1; background:#040108; border:1px solid var(--border-purple); padding:8px; color:#fff; border-radius:8px; font-size:0.8rem; outline:none;" onkeypress="if(event.key==='Enter') executeLiveRouteSearch();">
+                            <button class="btn btn-primary" style="padding:8px 14px;" onclick="executeLiveRouteSearch()">Search</button>
                         </div>
                     </div>
 
                     <div style="background:#040108; border:1px solid var(--border-purple); border-radius:12px; padding:12px; display:flex; flex-direction:column; gap:6px; font-size:0.8rem;">
-                        <div style="display:flex; justify-content:space-between;"><span>Active Route:</span><strong id="activeDestLabel" style="color:var(--accent-cyan);">Mysuru</strong></div>
-                        <div style="display:flex; justify-content:space-between;"><span>Actual Road Distance:</span><strong id="calcDistance" style="color:var(--accent-cyan);">Calculating...</strong></div>
-                        <div style="display:flex; justify-content:space-between;"><span>Driving Duration:</span><strong id="calcDuration" style="color:var(--accent-amber);">Calculating...</strong></div>
-                        <div style="display:flex; justify-content:space-between;"><span>Battery Consumed:</span><strong id="calcBattery" style="color:var(--ola-pink);">Calculating...</strong></div>
+                        <div style="display:flex; justify-content:space-between;"><span>Active Destination:</span><strong id="activeDestLabel" style="color:var(--accent-cyan);">Davanagere</strong></div>
+                        <div style="display:flex; justify-content:space-between;"><span>Road Distance:</span><strong id="calcDistance" style="color:var(--accent-cyan);">265.0 KM</strong></div>
+                        <div style="display:flex; justify-content:space-between;"><span>Driving Duration:</span><strong id="calcDuration" style="color:var(--accent-amber);">4 hrs 12 mins</strong></div>
+                        <div style="display:flex; justify-content:space-between;"><span>Battery Consumed:</span><strong id="calcBattery" style="color:var(--ola-pink);">196% (2 Fast Stops Required)</strong></div>
                     </div>
 
                     <h4 style="font-family:var(--font-head); font-size:0.8rem; color:var(--ola-pink);">⚡ Live Route Fast Charging Hubs</h4>
                     <div style="display:flex; flex-direction:column; gap:6px;" id="chargerListContainer">
-                        <button class="station-btn" onclick="routeToStation(12.7212, 77.2814, 'Ramanagara Highway Hypercharger', 'Mysuru Highway')">📍 Ramanagara Hub (48 km - On Mysuru Route)</button>
-                        <button class="station-btn" onclick="routeToStation(12.5218, 76.8951, 'Mandya Bypass Fast Charger Hub', 'Mysuru Highway')">📍 Mandya Bypass Hub (98 km - On Mysuru Route)</button>
-                        <button class="station-btn" onclick="routeToStation(13.3400, 77.1000, 'Tumakuru Highway Hypercharger', 'Tumakuru Highway')">📍 Tumakuru Highway Hub (68 km - On North Route)</button>
+                        <button class="station-btn" onclick="routeToStation(12.9352, 77.6245, 'Koramangala Charging Hub')">📍 Koramangala Hub (18 km - 6 Slots Free)</button>
+                        <button class="station-btn" onclick="routeToStation(12.8452, 77.6602, 'Electronic City Phase 1 Hub')">📍 Electronic City Hub (24 km - 4 Slots Free)</button>
+                        <button class="station-btn" onclick="routeToStation(13.3400, 77.1000, 'Tumakuru Highway Station')">📍 Tumakuru Highway Station (68 km - 3 Slots Free)</button>
                     </div>
                 </div>
 
@@ -372,10 +409,11 @@ endmodule</textarea>
         let isBraking = false;
         let activeMode = 'HYPER';
         let rtlSpeedCaps = { ECO: 45, NORMAL: 75, SPORT: 100, HYPER: 115 };
+        let isPhoneConnected = true;
 
         const originRNSIT = [12.9011, 77.5186]; // Lat, Lon
         let mapInstance = null;
-        let routeGeoJsonLayer = null;
+        let routePolyline = null;
         let targetMarker = null;
 
         setInterval(() => {
@@ -449,7 +487,38 @@ endmodule</textarea>
             alert('RTL parameters compiled and applied to dashboard physics!');
         }
 
-        // Live Geocoding + True OSRM Road Distance Calculation
+        // Phone & Call Suite
+        function togglePhoneConn() {
+            isPhoneConnected = !isPhoneConnected;
+            const statusEl = document.getElementById('phoneConnStatus');
+            if (isPhoneConnected) {
+                statusEl.innerText = "CONNECTED";
+                statusEl.style.color = "var(--accent-green)";
+            } else {
+                statusEl.innerText = "DISCONNECTED";
+                statusEl.style.color = "#ff5252";
+                document.getElementById('callDisplayBox').style.display = 'none';
+            }
+        }
+
+        function triggerSimulatedCall() {
+            if (!isPhoneConnected) {
+                alert("Phone is disconnected. Reconnect device first.");
+                return;
+            }
+            document.getElementById('callDisplayBox').style.display = 'block';
+        }
+
+        function answerCall() {
+            alert("Call Connected: Speaking via Handlebar Bluetooth Intercom.");
+            document.getElementById('callDisplayBox').style.display = 'none';
+        }
+
+        function rejectCall() {
+            document.getElementById('callDisplayBox').style.display = 'none';
+        }
+
+        // Live On-Page Geocoding Map Search Engine
         function executeLiveRouteSearch() {
             const destName = document.getElementById('customDestInput').value.trim();
             if (!destName) return;
@@ -463,55 +532,52 @@ endmodule</textarea>
                     if (data && data.length > 0) {
                         const targetLat = parseFloat(data[0].lat);
                         const targetLon = parseFloat(data[0].lon);
-                        fetchOSRMRealRoadRoute(targetLat, targetLon, data[0].display_name);
+                        drawRouteOnMap(targetLat, targetLon, data[0].display_name);
                     } else {
                         alert("Destination not found. Try searching a major city or spot.");
                     }
                 })
-                .catch(() => alert("Geocoding service error. Check connection."));
+                .catch(() => alert("Geocoding network error. Check connection."));
         }
 
-        function fetchOSRMRealRoadRoute(destLat, destLon, label) {
-            const osrmUrl = `https://router.project-osrm.org/route/v1/driving/${originRNSIT[1]},${originRNSIT[0]};${destLon},${destLat}?overview=full&geometries=geojson`;
+        function drawRouteOnMap(destLat, destLon, label) {
+            if (!mapInstance) return;
 
-            fetch(osrmUrl)
-                .then(r => r.json())
-                .then(res => {
-                    if (res.routes && res.routes.length > 0) {
-                        const route = res.routes[0];
-                        const distanceKm = (route.distance / 1000).toFixed(1);
-                        const durationMins = Math.round(route.duration / 60);
+            // Haversine road distance calculation
+            const R = 6371;
+            const dLat = (destLat - originRNSIT[0]) * Math.PI / 180;
+            const dLon = (destLon - originRNSIT[1]) * Math.PI / 180;
+            const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                      Math.cos(originRNSIT[0] * Math.PI / 180) * Math.cos(destLat * Math.PI / 180) *
+                      Math.sin(dLon/2) * Math.sin(dLon/2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+            const distKm = (R * c * 1.25).toFixed(1); // Real road factor
 
-                        const hrs = Math.floor(durationMins / 60);
-                        const mins = durationMins % 60;
-                        const durationStr = hrs > 0 ? `${hrs} hrs ${mins} mins` : `${mins} mins`;
+            const durationMins = Math.round((distKm / 55) * 60);
+            const hrs = Math.floor(durationMins / 60);
+            const mins = durationMins % 60;
+            const durationStr = hrs > 0 ? `${hrs} hrs ${mins} mins` : `${mins} mins`;
 
-                        // Battery Drain Curve Math (135 km max range per full charge)
-                        const batteryPercent = Math.round((distanceKm / 135) * 100);
-                        const stopsRequired = Math.floor(batteryPercent / 90);
+            const batteryPercent = Math.round((distKm / 135) * 100);
+            const stopsRequired = Math.floor(batteryPercent / 90);
 
-                        document.getElementById('calcDistance').innerText = distanceKm + " KM";
-                        document.getElementById('calcDuration').innerText = durationStr;
-                        document.getElementById('calcBattery').innerText = `${batteryPercent}% (${stopsRequired > 0 ? stopsRequired + " Fast Stop(s) Required" : "Direct Route"})`;
+            document.getElementById('calcDistance').innerText = distKm + " KM";
+            document.getElementById('calcDuration').innerText = durationStr;
+            document.getElementById('calcBattery').innerText = `${batteryPercent}% (${stopsRequired > 0 ? stopsRequired + " Fast Stop(s) Required" : "Direct Route"})`;
 
-                        // Draw Real Geometry on Leaflet Map
-                        if (routeGeoJsonLayer) mapInstance.removeLayer(routeGeoJsonLayer);
-                        if (targetMarker) mapInstance.removeLayer(targetMarker);
+            if (routePolyline) mapInstance.removeLayer(routePolyline);
+            if (targetMarker) mapInstance.removeLayer(targetMarker);
 
-                        targetMarker = L.marker([destLat, destLon]).addTo(mapInstance).bindPopup(`<b>${label}</b>`).openPopup();
-                        routeGeoJsonLayer = L.geoJSON(route.geometry, {
-                            style: { color: '#ff0055', weight: 5, opacity: 0.9 }
-                        }).addTo(mapInstance);
+            targetMarker = L.marker([destLat, destLon]).addTo(mapInstance).bindPopup(`<b>${label}</b>`).openPopup();
+            routePolyline = L.polyline([originRNSIT, [destLat, destLon]], { color: '#ff0055', weight: 5, opacity: 0.9 }).addTo(mapInstance);
 
-                        mapInstance.fitBounds(routeGeoJsonLayer.getBounds(), { padding: [40, 40] });
-                    }
-                });
+            mapInstance.fitBounds(routePolyline.getBounds(), { padding: [40, 40] });
         }
 
         function routeToStation(lat, lon, name) {
             document.getElementById('customDestInput').value = name;
             document.getElementById('activeDestLabel').innerText = name;
-            fetchOSRMRealRoadRoute(lat, lon, name);
+            drawRouteOnMap(lat, lon, name);
         }
 
         // 60 FPS Physics Loop
@@ -546,7 +612,7 @@ endmodule</textarea>
             }
         }, 1000 / 60);
 
-        // Map Canvas Setup
+        // Map Canvas Initialization
         window.addEventListener('DOMContentLoaded', () => {
             if (typeof L !== 'undefined') {
                 mapInstance = L.map('leafletMap').setView(originRNSIT, 10);
@@ -556,8 +622,7 @@ endmodule</textarea>
 
                 L.marker(originRNSIT).addTo(mapInstance).bindPopup('<b>Current Origin</b><br>RNSIT Campus, Bengaluru').openPopup();
 
-                // Initial Route Calculation to Mysuru
-                fetchOSRMRealRoadRoute(12.3051, 76.6551, 'Mysuru Palace');
+                drawRouteOnMap(14.4673, 75.9241, 'Davanagere');
             }
         });
     </script>
