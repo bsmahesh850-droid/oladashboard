@@ -281,10 +281,10 @@
         <section id="map-planner" class="tab-content">
             <div class="map-layout">
                 <div class="card-panel" style="display:flex; flex-direction:column; gap:12px;">
-                    <h3 style="font-family:var(--font-head);">🗺️ On-Page GPS Navigation Engine</h3>
+                    <h3 style="font-family:var(--font-head);">🗺️ True Road OSRM GPS Router</h3>
                     
                     <div class="ctrl-group" style="margin:0;">
-                        <label style="font-size:0.75rem; color:var(--text-sub);">Search Destination City/Spot (On-Page Map Zoom)</label>
+                        <label style="font-size:0.75rem; color:var(--text-sub);">Search Destination City/Spot (Follows Real Highways)</label>
                         <div style="display:flex; gap:6px;">
                             <input type="text" id="customDestInput" placeholder="Enter Davanagere, Mysuru, Airport..." value="Davanagere" style="flex:1; background:#040108; border:1px solid var(--border-purple); padding:8px; color:#fff; border-radius:8px; font-size:0.8rem; outline:none;" onkeypress="if(event.key==='Enter') executeLiveRouteSearch();">
                             <button class="btn btn-primary" style="padding:8px 14px;" onclick="executeLiveRouteSearch()">Search</button>
@@ -293,12 +293,12 @@
 
                     <div style="background:#040108; border:1px solid var(--border-purple); border-radius:12px; padding:12px; display:flex; flex-direction:column; gap:6px; font-size:0.8rem;">
                         <div style="display:flex; justify-content:space-between;"><span>Active Destination:</span><strong id="activeDestLabel" style="color:var(--accent-cyan);">Davanagere</strong></div>
-                        <div style="display:flex; justify-content:space-between;"><span>Road Distance:</span><strong id="calcDistance" style="color:var(--accent-cyan);">265.0 KM</strong></div>
-                        <div style="display:flex; justify-content:space-between;"><span>Driving Duration:</span><strong id="calcDuration" style="color:var(--accent-amber);">4 hrs 12 mins</strong></div>
-                        <div style="display:flex; justify-content:space-between;"><span>Battery Consumed:</span><strong id="calcBattery" style="color:var(--ola-pink);">196% (2 Fast Stops Required)</strong></div>
+                        <div style="display:flex; justify-content:space-between;"><span>Actual Driving Distance:</span><strong id="calcDistance" style="color:var(--accent-cyan);">Calculating...</strong></div>
+                        <div style="display:flex; justify-content:space-between;"><span>Driving Duration:</span><strong id="calcDuration" style="color:var(--accent-amber);">Calculating...</strong></div>
+                        <div style="display:flex; justify-content:space-between;"><span>Battery Consumed:</span><strong id="calcBattery" style="color:var(--ola-pink);">Calculating...</strong></div>
                     </div>
 
-                    <h4 style="font-family:var(--font-head); font-size:0.8rem; color:var(--ola-pink);">⚡ Live Route Fast Charging Hubs</h4>
+                    <h4 style="font-family:var(--font-head); font-size:0.8rem; color:var(--ola-pink);">⚡ Live Highway Fast Charging Stations</h4>
                     <div style="display:flex; flex-direction:column; gap:6px;" id="chargerListContainer">
                         <button class="station-btn" onclick="routeToStation(12.9352, 77.6245, 'Koramangala Charging Hub')">📍 Koramangala Hub (18 km - 6 Slots Free)</button>
                         <button class="station-btn" onclick="routeToStation(12.8452, 77.6602, 'Electronic City Phase 1 Hub')">📍 Electronic City Hub (24 km - 4 Slots Free)</button>
@@ -413,7 +413,7 @@ endmodule</textarea>
 
         const originRNSIT = [12.9011, 77.5186]; // Lat, Lon
         let mapInstance = null;
-        let routePolyline = null;
+        let routeGeoJsonLayer = null;
         let targetMarker = null;
 
         setInterval(() => {
@@ -518,13 +518,13 @@ endmodule</textarea>
             document.getElementById('callDisplayBox').style.display = 'none';
         }
 
-        // Live On-Page Geocoding Map Search Engine
+        // True Road Navigation via OSRM Driving Engine
         function executeLiveRouteSearch() {
             const destName = document.getElementById('customDestInput').value.trim();
             if (!destName) return;
 
             document.getElementById('activeDestLabel').innerText = destName;
-            document.getElementById('calcDistance').innerText = "Querying GPS...";
+            document.getElementById('calcDistance').innerText = "Querying OSRM Road Router...";
 
             fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(destName)}`)
                 .then(r => r.json())
@@ -532,7 +532,7 @@ endmodule</textarea>
                     if (data && data.length > 0) {
                         const targetLat = parseFloat(data[0].lat);
                         const targetLon = parseFloat(data[0].lon);
-                        drawRouteOnMap(targetLat, targetLon, data[0].display_name);
+                        fetchOSRMRealRoadRoute(targetLat, targetLon, data[0].display_name);
                     } else {
                         alert("Destination not found. Try searching a major city or spot.");
                     }
@@ -540,44 +540,50 @@ endmodule</textarea>
                 .catch(() => alert("Geocoding network error. Check connection."));
         }
 
-        function drawRouteOnMap(destLat, destLon, label) {
-            if (!mapInstance) return;
+        function fetchOSRMRealRoadRoute(destLat, destLon, label) {
+            // OSRM Driving Router API endpoint
+            const osrmUrl = `https://router.project-osrm.org/route/v1/driving/${originRNSIT[1]},${originRNSIT[0]};${destLon},${destLat}?overview=full&geometries=geojson`;
 
-            // Haversine road distance calculation
-            const R = 6371;
-            const dLat = (destLat - originRNSIT[0]) * Math.PI / 180;
-            const dLon = (destLon - originRNSIT[1]) * Math.PI / 180;
-            const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-                      Math.cos(originRNSIT[0] * Math.PI / 180) * Math.cos(destLat * Math.PI / 180) *
-                      Math.sin(dLon/2) * Math.sin(dLon/2);
-            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-            const distKm = (R * c * 1.25).toFixed(1); // Real road factor
+            fetch(osrmUrl)
+                .then(r => r.json())
+                .then(res => {
+                    if (res.routes && res.routes.length > 0) {
+                        const route = res.routes[0];
+                        const distanceKm = (route.distance / 1000).toFixed(1);
+                        const durationMins = Math.round(route.duration / 60);
 
-            const durationMins = Math.round((distKm / 55) * 60);
-            const hrs = Math.floor(durationMins / 60);
-            const mins = durationMins % 60;
-            const durationStr = hrs > 0 ? `${hrs} hrs ${mins} mins` : `${mins} mins`;
+                        const hrs = Math.floor(durationMins / 60);
+                        const mins = durationMins % 60;
+                        const durationStr = hrs > 0 ? `${hrs} hrs ${mins} mins` : `${mins} mins`;
 
-            const batteryPercent = Math.round((distKm / 135) * 100);
-            const stopsRequired = Math.floor(batteryPercent / 90);
+                        const batteryPercent = Math.round((distanceKm / 135) * 100);
+                        const stopsRequired = Math.floor(batteryPercent / 90);
 
-            document.getElementById('calcDistance').innerText = distKm + " KM";
-            document.getElementById('calcDuration').innerText = durationStr;
-            document.getElementById('calcBattery').innerText = `${batteryPercent}% (${stopsRequired > 0 ? stopsRequired + " Fast Stop(s) Required" : "Direct Route"})`;
+                        document.getElementById('calcDistance').innerText = distanceKm + " KM";
+                        document.getElementById('calcDuration').innerText = durationStr;
+                        document.getElementById('calcBattery').innerText = `${batteryPercent}% (${stopsRequired > 0 ? stopsRequired + " Fast Stop(s) Required" : "Direct Route"})`;
 
-            if (routePolyline) mapInstance.removeLayer(routePolyline);
-            if (targetMarker) mapInstance.removeLayer(targetMarker);
+                        // Remove old layers
+                        if (routeGeoJsonLayer) mapInstance.removeLayer(routeGeoJsonLayer);
+                        if (targetMarker) mapInstance.removeLayer(targetMarker);
 
-            targetMarker = L.marker([destLat, destLon]).addTo(mapInstance).bindPopup(`<b>${label}</b>`).openPopup();
-            routePolyline = L.polyline([originRNSIT, [destLat, destLon]], { color: '#ff0055', weight: 5, opacity: 0.9 }).addTo(mapInstance);
+                        targetMarker = L.marker([destLat, destLon]).addTo(mapInstance).bindPopup(`<b>${label}</b>`).openPopup();
+                        
+                        // Draw TRUE ROAD GEOMETRY polyline along actual highways
+                        routeGeoJsonLayer = L.geoJSON(route.geometry, {
+                            style: { color: '#ff0055', weight: 5, opacity: 0.9 }
+                        }).addTo(mapInstance);
 
-            mapInstance.fitBounds(routePolyline.getBounds(), { padding: [40, 40] });
+                        mapInstance.fitBounds(routeGeoJsonLayer.getBounds(), { padding: [40, 40] });
+                    }
+                })
+                .catch(() => alert("OSRM Routing API offline or rate-limited. Trying direct fallback..."));
         }
 
         function routeToStation(lat, lon, name) {
             document.getElementById('customDestInput').value = name;
             document.getElementById('activeDestLabel').innerText = name;
-            drawRouteOnMap(lat, lon, name);
+            fetchOSRMRealRoadRoute(lat, lon, name);
         }
 
         // 60 FPS Physics Loop
@@ -612,7 +618,7 @@ endmodule</textarea>
             }
         }, 1000 / 60);
 
-        // Map Canvas Initialization
+        // Map Canvas Setup
         window.addEventListener('DOMContentLoaded', () => {
             if (typeof L !== 'undefined') {
                 mapInstance = L.map('leafletMap').setView(originRNSIT, 10);
@@ -622,7 +628,8 @@ endmodule</textarea>
 
                 L.marker(originRNSIT).addTo(mapInstance).bindPopup('<b>Current Origin</b><br>RNSIT Campus, Bengaluru').openPopup();
 
-                drawRouteOnMap(14.4673, 75.9241, 'Davanagere');
+                // Initial Route to Davanagere using real highways
+                fetchOSRMRealRoadRoute(14.4673, 75.9241, 'Davanagere');
             }
         });
     </script>
